@@ -1,0 +1,24 @@
+{
+  "score": 9,
+  "criticalCount": 0,
+  "decision": "SEALED",
+  "acceptanceCovered": [
+    "/login renders the SAA 2025 Root Further design: keyvisual background artwork, gradient overlays, semi-transparent header with SAA logo and static VN language selector, ROOT FURTHER logo, Vietnamese tagline, yellow LOGIN With Google button, bordered copyright footer — verified by reading app/login/page.tsx, login-header.tsx, login-hero.tsx, google-login-button.tsx, login-footer.tsx (all elements present with matching classes/assets) and by tester's independent HTML-content checks (button text, tagline, footer copyright all render); all 6 referenced assets return 200.",
+    "Clicking LOGIN With Google POSTs the loginWithGoogle server action and redirects to the local Supabase /auth/v1/authorize URL for provider google with a PKCE code_challenge and redirect_to /auth/callback — verified live: extracted the real $ACTION_ID from the rendered form and POSTed it with a same-origin Origin header, got back 303 See Other with Location: http://127.0.0.1:54321/auth/v1/authorize?provider=google&redirect_to=http%3A%2F%2Flocalhost%3A3000%2Fauth%2Fcallback&code_challenge=...&code_challenge_method=s256, plus the sb-*-code-verifier cookie set for PKCE.",
+    "/auth/callback without a valid code redirects to /login?error=auth and the login page renders the Vietnamese error message Dang nhap that bai — verified live for both the trivial case (GET /auth/callback with no code -> 307 to /login?error=auth) and the stronger case (GET /auth/callback?code=fake-test-code against a genuinely dead local Supabase -> exchangeCodeForSession fails, caught, 307 to /login?error=auth with no leaked stack trace); confirmed GET /login?error=auth renders 'Đăng nhập thất bại. Vui lòng thử lại.'",
+    "Unauthenticated requests to protected paths redirect to /login while /login and /auth remain public with no redirect loop — verified live: GET / -> 307 to /login; GET /login -> 200; GET /auth/callback -> 307 (public, not blocked); curl -L on / terminates cleanly at /login (200), no loop.",
+    "pnpm build compiles with zero TypeScript errors and app code (app, lib, proxy.ts) lints with zero eslint errors — independently re-ran pnpm build (0 TS errors, successful production build) and npx eslint app lib proxy.ts (0 errors, 6 warnings, all @next/next/no-img-element which is an accepted trade-off per task brief)."
+  ],
+  "regressionChecked": [
+    "grep -rn \"LoginState|login-form\" across the whole repo (excluding node_modules) returns zero hits — deleted app/login/login-form.tsx and its LoginState export have no remaining references anywhere",
+    "git status/diff confirms app/layout.tsx, app/page.tsx, lib/supabase/client.ts, lib/supabase/server.ts, proxy.ts are untouched, matching the plan's stated blast radius exactly",
+    "lib/supabase/middleware.ts PUBLIC_PATHS now includes /auth (was /login only) — walked effect on every request via proxy.ts's matcher: verified / still redirects unauthenticated users to /login, /login itself stays public, /auth/callback stays public and does not loop",
+    ".env.local.example documents required Google provider setup without embedding any real secret/credential",
+    "no secrets, API keys, or hardcoded credentials found via grep across app/lib/proxy.ts",
+    "Re-verified post-fix diff (Origin fallback in actions.ts + console.error logging in actions.ts/route.ts): live-tested missing-Origin now yields the correct redirect_to (no more literal 'null/auth/callback'); same-origin happy path unchanged; forged cross-origin Origin still blocked with 500 by Next's Server Action CSRF guard (unaffected by the fix); console.error additions log only Supabase AuthError objects server-side, no PII/secrets/stack traces reach the client; re-ran tsc --noEmit and eslint on both changed files (clean)."
+  ],
+  "contractStatus": "OK",
+  "refuted": [],
+  "unproven": [],
+  "reachableRegressions": []
+}

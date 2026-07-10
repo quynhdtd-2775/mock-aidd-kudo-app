@@ -24,7 +24,8 @@
           "node $HOME/.claude/hooks/plan-format-kanban.cjs",
           "node $HOME/.claude/hooks/usage-context-awareness.cjs",
           "node $HOME/.claude/hooks/task-completed-handler.cjs",
-          "node $HOME/.claude/hooks/precompact-guard.cjs"
+          "node $HOME/.claude/hooks/precompact-guard.cjs",
+          "node $HOME/.claude/hooks/teammate-idle-handler.cjs"
         ],
         "mcpServers": []
       }

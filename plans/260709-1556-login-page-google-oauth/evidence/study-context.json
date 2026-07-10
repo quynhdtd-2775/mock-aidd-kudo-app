@@ -1,0 +1,35 @@
+{
+  "task": "Implement the /login page per MoMorph/Figma design (fileKey 9ypp4enmFmdK3YAFJLIu6C, frame 662:14387 'Login'): SAA 2025 Root Further screen with Google-OAuth-only sign-in against the local Supabase project. Replace the prior email/password implementation.",
+  "mode": "takumi interactive (MoMorph two-track parallel protocol; MoMorph MCP down, design via Figma MCP)",
+  "acceptanceCriteria": [
+    "/login renders the SAA 2025 Root Further design: keyvisual background artwork, gradient overlays, semi-transparent header with SAA logo and static VN language selector, ROOT FURTHER logo, Vietnamese tagline, yellow LOGIN With Google button, bordered copyright footer",
+    "Clicking LOGIN With Google POSTs the loginWithGoogle server action and redirects to the local Supabase /auth/v1/authorize URL for provider google with a PKCE code_challenge and redirect_to /auth/callback",
+    "/auth/callback without a valid code redirects to /login?error=auth and the login page renders the Vietnamese error message Dang nhap that bai",
+    "Unauthenticated requests to protected paths redirect to /login while /login and /auth remain public with no redirect loop",
+    "pnpm build compiles with zero TypeScript errors and app code (app, lib, proxy.ts) lints with zero eslint errors"
+  ],
+  "touchpoints": [
+    "app/login/page.tsx",
+    "app/login/actions.ts",
+    "app/login/login-fonts.ts",
+    "app/login/login-header.tsx",
+    "app/login/login-hero.tsx",
+    "app/login/google-login-button.tsx",
+    "app/login/login-footer.tsx",
+    "app/auth/callback/route.ts",
+    "lib/supabase/middleware.ts",
+    "public/login/*",
+    ".env.local.example"
+  ],
+  "blastRadius": [
+    "app/login/login-form.tsx deleted (obsolete email/password form) — nothing else imported it",
+    "login/LoginState exports removed from app/login/actions.ts — only the deleted form consumed them",
+    "lib/supabase/middleware.ts PUBLIC_PATHS now includes /auth — affects every request via proxy.ts matcher",
+    "app/layout.tsx, app/page.tsx, lib/supabase/{client,server}.ts, proxy.ts untouched"
+  ],
+  "contracts": [
+    "UI-backend contract: google-login-button.tsx submits <form action={loginWithGoogle}> imported from app/login/actions.ts",
+    "OAuth callback contract: Supabase redirects to /auth/callback?code=...; route exchanges code for session then redirects to /; failure path is /login?error=auth",
+    "Supabase env contract: NEXT_PUBLIC_SUPABASE_URL + NEXT_PUBLIC_SUPABASE_ANON_KEY from .env.local; Google provider config is user-owned in local Supabase (documented in .env.local.example)"
+  ]
+}

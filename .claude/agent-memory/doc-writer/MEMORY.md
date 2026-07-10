@@ -1,0 +1,1 @@
+- [Docs bootstrap decision](project_docs-bootstrap.md) — docs/ started with one system-architecture.md for login/auth; extend it, don't fragment, until app grows.

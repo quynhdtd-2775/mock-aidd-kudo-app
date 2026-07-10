@@ -1,0 +1,116 @@
+{
+  "commands": [
+    {
+      "command": "pnpm build",
+      "exitCode": 0,
+      "status": "pass",
+      "summary": "Next.js build compiled successfully with 0 TypeScript errors",
+      "ts": "2026-07-09T09:26:11Z"
+    },
+    {
+      "command": "npx tsc --noEmit",
+      "exitCode": 0,
+      "status": "pass",
+      "summary": "TypeScript type checking passed with 0 errors",
+      "ts": "2026-07-09T09:26:21Z"
+    },
+    {
+      "command": "npx eslint app lib proxy.ts",
+      "exitCode": 0,
+      "status": "pass",
+      "summary": "ESLint passed with 0 errors, 6 warnings (@next/next/no-img-element — deliberate trade-off)",
+      "ts": "2026-07-09T09:26:24Z"
+    },
+    {
+      "command": "curl -sI http://localhost:3000/auth/callback",
+      "exitCode": 0,
+      "status": "pass",
+      "summary": "Auth callback returns 307 redirect to /login?error=auth (no code parameter)",
+      "ts": "2026-07-09T09:26:11Z"
+    },
+    {
+      "command": "curl -sI http://localhost:3000/",
+      "exitCode": 0,
+      "status": "pass",
+      "summary": "Root path protected by middleware: 307 redirect to /login",
+      "ts": "2026-07-09T09:26:15Z"
+    },
+    {
+      "command": "curl -sI http://localhost:3000/login",
+      "exitCode": 0,
+      "status": "pass",
+      "summary": "Login page accessible without auth: 200 OK, public path",
+      "ts": "2026-07-09T09:26:25Z"
+    },
+    {
+      "command": "curl -s http://localhost:3000/login | grep -c 'LOGIN With Google'",
+      "exitCode": 0,
+      "status": "pass",
+      "summary": "Login page contains Google button text 'LOGIN With Google'",
+      "ts": "2026-07-09T09:26:26Z"
+    },
+    {
+      "command": "curl -s http://localhost:3000/login | grep -c 'Bắt đầu hành trình'",
+      "exitCode": 0,
+      "status": "pass",
+      "summary": "Login page contains Vietnamese tagline 'Bắt đầu hành trình'",
+      "ts": "2026-07-09T09:26:27Z"
+    },
+    {
+      "command": "curl -s http://localhost:3000/login | grep -c 'Bản quyền thuộc về Sun'",
+      "exitCode": 0,
+      "status": "pass",
+      "summary": "Login page footer contains copyright 'Bản quyền thuộc về Sun*'",
+      "ts": "2026-07-09T09:26:28Z"
+    },
+    {
+      "command": "curl -s 'http://localhost:3000/login?error=auth' | grep -c 'Đăng nhập thất bại'",
+      "exitCode": 0,
+      "status": "pass",
+      "summary": "Error parameter ?error=auth displays error message 'Đăng nhập thất bại'",
+      "ts": "2026-07-09T09:26:29Z"
+    },
+    {
+      "command": "curl -sI http://localhost:3000/login/keyvisual-background.png",
+      "exitCode": 0,
+      "status": "pass",
+      "summary": "Asset keyvisual-background.png available: 200 OK",
+      "ts": "2026-07-09T09:26:30Z"
+    },
+    {
+      "command": "curl -sI http://localhost:3000/login/root-further-logo.png",
+      "exitCode": 0,
+      "status": "pass",
+      "summary": "Asset root-further-logo.png available: 200 OK",
+      "ts": "2026-07-09T09:26:31Z"
+    },
+    {
+      "command": "curl -sI http://localhost:3000/login/saa-logo.png",
+      "exitCode": 0,
+      "status": "pass",
+      "summary": "Asset saa-logo.png available: 200 OK",
+      "ts": "2026-07-09T09:26:32Z"
+    },
+    {
+      "command": "curl -sI http://localhost:3000/login/google-icon.svg",
+      "exitCode": 0,
+      "status": "pass",
+      "summary": "Asset google-icon.svg available: 200 OK",
+      "ts": "2026-07-09T09:26:33Z"
+    },
+    {
+      "command": "curl -sI http://localhost:3000/login/vn-flag-icon.png",
+      "exitCode": 0,
+      "status": "pass",
+      "summary": "Asset vn-flag-icon.png available: 200 OK",
+      "ts": "2026-07-09T09:26:34Z"
+    },
+    {
+      "command": "curl -sI http://localhost:3000/login/chevron-down-icon.svg",
+      "exitCode": 0,
+      "status": "pass",
+      "summary": "Asset chevron-down-icon.svg available: 200 OK",
+      "ts": "2026-07-09T09:26:35Z"
+    }
+  ]
+}

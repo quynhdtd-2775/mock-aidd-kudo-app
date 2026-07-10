@@ -1,46 +1,39 @@
 "use server";
 
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 
-export type LoginState = {
-  error: string | null;
-};
-
-export async function login(
-  _prevState: LoginState,
-  formData: FormData,
-): Promise<LoginState> {
-  const email = formData.get("email");
-  const password = formData.get("password");
-
-  if (typeof email !== "string" || typeof password !== "string") {
-    return { error: "Email and password are required." };
-  }
-
-  const trimmedEmail = email.trim();
-  const trimmedPassword = password.trim();
-
-  if (!trimmedEmail || !trimmedPassword) {
-    return { error: "Email and password are required." };
-  }
-
+export async function loginWithGoogle() {
+  const headerStore = await headers();
+  // Origin is absent on some non-browser clients — fall back to Host so the
+  // redirectTo never becomes the literal string "null/auth/callback".
+  const origin =
+    headerStore.get("origin") ??
+    `${headerStore.get("x-forwarded-proto") ?? "http"}://${headerStore.get("host")}`;
   const supabase = await createClient();
 
-  let signInFailed = false;
+  let providerUrl: string | null = null;
   try {
-    const { error } = await supabase.auth.signInWithPassword({
-      email: trimmedEmail,
-      password: trimmedPassword,
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: `${origin}/auth/callback`,
+      },
     });
-    signInFailed = Boolean(error);
-  } catch {
-    signInFailed = true;
+    if (error) {
+      console.error("loginWithGoogle: signInWithOAuth failed", error);
+    } else {
+      providerUrl = data.url;
+    }
+  } catch (err) {
+    console.error("loginWithGoogle: signInWithOAuth threw", err);
+    providerUrl = null;
   }
 
-  if (signInFailed) {
-    return { error: "Invalid email or password." };
+  if (!providerUrl) {
+    redirect("/login?error=auth");
   }
 
-  redirect("/");
+  redirect(providerUrl);
 }
