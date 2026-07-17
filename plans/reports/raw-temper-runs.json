@@ -1,0 +1,22 @@
+[
+  {
+    "command": "pnpm exec vitest run",
+    "exitCode": 0,
+    "summary": "All 279 tests pass across 16 test files (72 kudos-specific tests included)"
+  },
+  {
+    "command": "pnpm exec tsc --noEmit",
+    "exitCode": 0,
+    "summary": "Zero TypeScript errors"
+  },
+  {
+    "command": "pnpm exec eslint lib/kudos app/kudos-live-board components/kudos components/kudos-live-board",
+    "exitCode": 0,
+    "summary": "Zero linting errors/warnings in kudos scope"
+  },
+  {
+    "command": "pnpm build",
+    "exitCode": 0,
+    "summary": "Production build succeeds; Next.js 16.2.10 with Turbopack; 11 routes compiled; middleware proxy included"
+  }
+]

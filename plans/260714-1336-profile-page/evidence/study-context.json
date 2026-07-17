@@ -1,0 +1,35 @@
+{
+  "task": "Implement the profile page (/profile) from MoMorph screen 3FoIx6ALVb (Profile bản thân), backed by a local Supabase project: schema + seed, server-side data layer with demo-user fallback, presentational UI from Figma, integrated server-component page.",
+  "mode": "takumi interactive (MoMorph two-track override)",
+  "acceptanceCriteria": [
+    "Project type-checks with no errors (tsc --noEmit exit 0) including the new lib/profile, app/profile and components/profile files",
+    "Unit tests for the profile data/mapping layer pass (vitest, 24 tests: view mappers incl. vi-VN formatting and Asia/Ho_Chi_Minh time, current-user DISABLE_AUTH demo fallback)",
+    "Feature-scoped lint is clean (eslint over lib/profile, app/profile, components/profile, vitest.config.ts exits 0)",
+    "/profile responds HTTP 200 on the dev server and renders a safe empty state (no crash) when the local Supabase stack is unreachable"
+  ],
+  "touchpoints": [
+    "supabase/config.toml",
+    "supabase/migrations/20260714070000_profile_schema.sql",
+    "supabase/seed.sql",
+    "lib/profile/profile-types.ts",
+    "lib/profile/current-user.ts",
+    "lib/profile/profile-queries.ts",
+    "lib/profile/profile-view-mappers.ts",
+    "app/profile/page.tsx",
+    "components/profile/ (10 files)",
+    "vitest.config.ts",
+    "package.json (test script, vitest devDependency)"
+  ],
+  "blastRadius": [
+    "New route /profile only — no existing route modified",
+    "components/profile/profile-badges-row.tsx extended (icons prop, backward-compatible default)",
+    "components/profile/profile-kudo-post-card.tsx avatar props (backward-compatible fallback to sample avatars)",
+    "Reused kudos-live-board components imported read-only (no edits)",
+    "supabase/ directory is new — no prior schema to migrate"
+  ],
+  "contracts": [
+    "ProfileHeroSectionProps / ProfileKudoPostData prop contracts between lib/profile mappers and components/profile (verified by tsc + mapper unit tests)",
+    "DEMO_USER_ID constant shared between supabase/seed.sql and lib/profile/current-user.ts (documented in both)",
+    "DISABLE_AUTH bypass semantics mirrored from lib/supabase/middleware.ts (NODE_ENV-gated)"
+  ]
+}

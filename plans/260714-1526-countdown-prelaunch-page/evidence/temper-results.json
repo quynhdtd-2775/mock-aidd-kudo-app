@@ -1,0 +1,18 @@
+{
+  "commands": [
+    {
+      "command": "pnpm vitest run",
+      "exitCode": 0,
+      "status": "pass",
+      "summary": "Tests 160 passed (160)",
+      "ts": "2026-07-14T09:05:08.784Z"
+    },
+    {
+      "command": "pnpm tsc --noEmit",
+      "exitCode": 0,
+      "status": "pass",
+      "summary": "typecheck clean, 0 errors",
+      "ts": "2026-07-14T09:05:08.784Z"
+    }
+  ]
+}

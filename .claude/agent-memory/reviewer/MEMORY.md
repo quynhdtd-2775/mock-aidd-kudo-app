@@ -1,0 +1,2 @@
+- [Kudo-app Supabase patterns](project_kudo-app-supabase-patterns.md) — mock-auth double-gate, display_name has no uniqueness, comma-joined hashtags column
+- [Sandbox node_modules blocked](reference_sandbox-node-modules-blocked.md) — Bash/Read can't inspect node_modules; use tsc --noEmit as indirect verification

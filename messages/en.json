@@ -1,0 +1,252 @@
+{
+  "Home": {
+    "metaTitle": "Sun* Annual Awards 2025 — Awards System",
+    "metaDescription": "Sun* Annual Awards 2025 — Awards System"
+  },
+  "Header": {
+    "navAbout": "About SAA 2025",
+    "navAwardInfo": "Award Information",
+    "navSunKudos": "Sun* Kudos",
+    "languageSelector": "Select language"
+  },
+  "Footer": {
+    "navAbout": "About SAA 2025",
+    "navAwardInfo": "Award Information",
+    "navSunKudos": "Sun* Kudos",
+    "navCommonStandard": "Common Standards",
+    "copyright": "Copyright © 2025 Sun*"
+  },
+  "UserMenu": {
+    "accountAriaLabel": "Account",
+    "logout": "Log out"
+  },
+  "Hero": {
+    "comingSoon": "Coming soon",
+    "countdownDays": "DAYS",
+    "countdownHours": "HOURS",
+    "countdownMinutes": "MINUTES",
+    "eventTimeLabel": "Time: ",
+    "eventTimeValue": "26/12/2025",
+    "eventLocationLabel": "Location:",
+    "eventLocationValue": "Âu Cơ Art Center",
+    "livestreamNote": "Streamed live via Livestream",
+    "ctaAboutAwards": "ABOUT AWARDS",
+    "ctaAboutKudos": "ABOUT KUDOS",
+    "widgetButtonAriaLabel": "Write Kudos",
+    "rootFurtherLogoAlt": "Root Further — Sun* Annual Awards 2025",
+    "themeParagraphOne": "Facing the whirlwind changes of the AI era and ever-rising expectations from clients, Sun* has chosen a strategy of diversifying capabilities — not only striving to become an elite player in its own field, but also reaching for a higher purpose, where every Sunner is a “problem-solver”: an expert at tackling every challenge and finding answers to every problem faced by projects, clients, and society.\nInspired by diversity of capability, the ability to grow flexibly, and the spirit of digging deep to break through in the AI era, “Root Further” has been chosen as the official theme of the Sun* Annual Awards 2025 ceremony.\nBeyond its surface meaning, “Root Further” is the journey of continuously reaching further and rooting deeper, touching the hidden “geological layers” beneath the surface to keep surviving, rising, and nurturing Sun* people's ever-burning passion for creating value. Like roots that keep pushing deeper into the earth, weaving strongly through each “sediment layer” to absorb the finest nutrients, Sun* people are also “absorbing” nourishment from the times and the market's challenges to renew themselves every day, expand their capabilities, and firmly “take root” in the AI era — an entirely new, complex, and unpredictable “geological layer”, yet one brimming with potential and opportunity.",
+    "themeQuote": " “A tree with deep roots fears no storm”\n (English proverb)",
+    "themeParagraphTwo": "In the face of storms, only trees with roots strong enough can stand firm. An organization whose people believe in their diverse capabilities, are ready to create and embrace challenges, and take charge of change is one that not only stays resilient amid turbulence but also seizes every advantage and conquers the challenges of the times. More than just the name of a new chapter in the organization's growth journey, “Root Further” is also a call encouraging each of us to dare to believe in ourselves, dare to dig deep and unlock our full potential, dare to break through our limits, and dare to become the most versatile and outstanding version of ourselves. Because in the AI era, diverse capability and harnessing the power of the times are the prerequisites for lasting far into the future.\nNo one can foresee how many mysterious “geological layers” still lie hidden beneath the “ground” of the technology industry and today's market. All we know is that once “Root Further” becomes our rooted spirit, we will feel no fear — only excitement for whatever uncharted territory lies ahead on our journey forward. For we always believe that within those boundless territories lie countless wonders and opportunities for us to rise and grow."
+  },
+  "Awards": {
+    "sectionLabel": "Sun* annual awards 2025",
+    "sectionTitle": "Awards System",
+    "detailsButton": "Details",
+    "cards": {
+      "topTalent": {
+        "title": "Top Talent",
+        "description": "Honoring the top individuals who excel in every aspect"
+      },
+      "topProject": {
+        "title": "Top Project",
+        "description": "Honoring the project that excels in every aspect, with outstanding revenue"
+      },
+      "topProjectLeader": {
+        "title": "Top Project Leader",
+        "description": "Honoring the manager who inspires and leads a project to breakthrough success"
+      },
+      "bestManager": {
+        "title": "Best Manager",
+        "description": "Honoring the manager with strong management skills who leads their team well"
+      },
+      "signature2025Creator": {
+        "title": "Signature 2025 - Creator",
+        "description": "Honoring the manager with strong management skills who leads their team well"
+      },
+      "mvp": {
+        "title": "MVP (Most Valuable Person)",
+        "description": "Honoring the manager with strong management skills who leads their team well"
+      }
+    }
+  },
+  "SunKudos": {
+    "heading": "Recognition movement ",
+    "brandName": "Sun* Kudos",
+    "highlightTitle": "WHAT'S NEW IN SAA 2025",
+    "description": "A recognition and appreciation initiative — for the first time open to all Sunners. It will roll out in November 2025, encouraging Sun* people to share words of recognition and thanks for their colleagues on the platform announced by the organizing committee. This will serve as material for the Heads Council to reference when selecting award winners.",
+    "detailsButton": "Details"
+  },
+  "AwardsPage": {
+    "metaTitle": "SAA 2025 Awards System",
+    "metaDescription": "Sun* Annual Awards 2025 — Awards System",
+    "heroEyebrow": "Sun* Annual Awards 2025",
+    "heroTitle": "SAA 2025 Awards System",
+    "heroLogoAlt": "Sun* Further Logo",
+    "menuAriaLabel": "Awards menu",
+    "quantityLabel": "Number of awards:",
+    "valueLabel": "Award value:",
+    "orDivider": "Or",
+    "menu": {
+      "topProjectLeader": "Top Project\nLeader",
+      "signature2025Creator": "Signature 2025 \nCreator"
+    },
+    "cards": {
+      "topTalent": {
+        "description": "The Top Talent award honors individuals who excel across the board — professionals with strong expertise and outstanding performance who consistently deliver results beyond expectations, earning recognition from both clients and teammates. Always ready to take on any task the organization entrusts to them, they are a constant source of inspiration who drive motivation and a positive impact across the whole team.",
+        "unit": "Individual",
+        "perAwardCaption": "per award"
+      },
+      "topProject": {
+        "description": "The Top Project award honors project teams that deliver outstanding business results, optimal operating efficiency, and dedicated teamwork. These are technically complex projects that make excellent use of resources and cost, propose valuable ideas for clients, generate exceptional profit, and receive positive client feedback. Members strictly adhere to internal development standards throughout the project, setting a benchmark for excellence and professionalism.",
+        "unit": "Team",
+        "perAwardCaption": "per award"
+      },
+      "topProjectLeader": {
+        "description": "The Top Project Leader award honors outstanding project managers — people who combine strong management capability, powerful inspirational leadership, and an \"Aim High – Be Agile\" mindset for every problem and context. Under their guidance, team members not only overcome challenges and achieve their goals together, but also keep their enthusiasm and Wasshoi spirit alive, growing into more accomplished, happier versions of themselves.",
+        "unit": "Individual",
+        "perAwardCaption": "per award"
+      },
+      "bestManager": {
+        "description": "The Best Manager award honors outstanding leaders who have guided their teams to results that exceed expectations, making a significant impact on business performance and the organization's sustainable growth. Under their leadership, the team consistently conquers and masters every goal through multitasking ability, effective collaboration, and an agile mindset for applying technology in the digital era. They inspire the team to stay confident and energized, ready to embrace — and even lead — revolutionary change.",
+        "unit": "Individual",
+        "perAwardCaption": "per award"
+      },
+      "signature2025Creator": {
+        "description": "The Signature award honors an individual or team that embodies the spirit Sun* champions in each era. In 2025, the Signature award honors the Creator — an individual/team with a proactive, sharp mindset who always sees opportunity in challenge and takes the lead in action. They are quick to spot problems and swiftly deliver practical solutions that create clear value for projects, clients, or the organization. With a creative mindset and Sun*'s signature \"Creator\" spirit, they don't just respond positively to change — they actively drive improvement, helping shape new standards for how Sun* people create value.",
+        "unit": "Individual or team",
+        "individualCaption": "for the individual award",
+        "collectiveCaption": "for the team award"
+      },
+      "mvp": {
+        "description": "The MVP award honors the year's most outstanding individual — the standout figure representing the entire Sun* community. They have demonstrated exceptional capability, sustained dedication, and far-reaching influence, leaving a strong mark on Sun*'s journey over the past year. Beyond their performance and results, they are also a source of inspiration through their thinking, actions, and positive influence on the team. The MVP embodies the full qualities of an outstanding Sun* person, while carrying a great responsibility: to be the representative model of Sun*'s people and spirit, helping lead the team to new heights.",
+        "unit": "Individual",
+        "perAwardCaption": "per award",
+        "badgeText": "MVP"
+      }
+    }
+  },
+  "LiveBoard": {
+    "metaTitle": "Sun* Kudos - Live board",
+    "metaDescription": "Recognition and appreciation system",
+    "profileAriaLabel": "Profile",
+    "sunLogoAlt": "Sun*",
+    "kudosLogoAlt": "Sun* Kudos",
+    "kudosHeading": "Recognition and appreciation system",
+    "askPrompt": "Who would you like to send thanks and recognition to today?",
+    "searchSunnerProfile": "Search Sunner profile",
+    "sectionTitle": "Sun* Annual Awards 2025",
+    "highlightHeading": "HIGHLIGHT KUDOS",
+    "filterHashtag": "Hashtag",
+    "filterDepartment": "Department",
+    "copyLink": "Copy Link",
+    "viewDetail": "View details",
+    "prevKudoAriaLabel": "Previous kudos",
+    "nextKudoAriaLabel": "Next kudos",
+    "prevPageAriaLabel": "Previous page",
+    "nextPageAriaLabel": "Next page",
+    "allKudosHeading": "ALL KUDOS",
+    "giftReceiversTitle": "10 LATEST SUNNERS\nWHO RECEIVED GIFTS",
+    "statKudosReceived": "Kudos you received:",
+    "statKudosSent": "Kudos you sent:",
+    "statHeartsReceived": "Hearts you received:",
+    "statSecretBoxOpened": "Secret Boxes you opened:",
+    "statSecretBoxUnopened": "Secret Boxes not opened yet:",
+    "openSecretBox": "Open Secret Box",
+    "spotlightHeading": "SPOTLIGHT BOARD",
+    "spotlightSearch": "Search",
+    "panZoomAriaLabel": "Pan and zoom board",
+    "spotlightKudosCount": "388 KUDOS",
+    "heroBadgeNew": "New Hero",
+    "heroBadgeRising": "Rising Hero",
+    "heroBadgeLegend": "Legend Hero",
+    "heroBadgeSuper": "Super Hero"
+  },
+  "Profile": {
+    "metaTitle": "My Profile | Sun* Annual Awards 2025",
+    "metaDescription": "Personal profile page — badges, stats, and received Sun* Kudos.",
+    "emptyState": "No profile data yet. Please log in or check the local Supabase instance (supabase start).",
+    "sentCount": "Sent ({count})",
+    "awardsTitle": "Sun* Annual Awards 2025",
+    "kudosHeading": "KUDOS",
+    "kudosStatReceived": "Kudos you received:",
+    "kudosStatSent": "Kudos you sent:",
+    "heartsStatReceived": "Hearts you received:",
+    "secretBoxOpened": "Secret Boxes you opened:",
+    "secretBoxUnopened": "Secret Boxes not yet opened:",
+    "copyLink": "Copy Link",
+    "spamBadge": "Spam",
+    "iconCollectionLink": "My icon collection",
+    "openSecretBox": "Open Secret Box"
+  },
+  "Login": {
+    "metaTitle": "Log in",
+    "taglineLine1": "Start your journey with SAA 2025.",
+    "taglineLine2": "Log in to explore!",
+    "loginFailedError": "Login failed. Please try again.",
+    "emailPlaceholder": "Email",
+    "passwordPlaceholder": "Password",
+    "submitPending": "Logging in…",
+    "submitLabel": "Log in with Email",
+    "missingCredentialsError": "Please enter your email and password.",
+    "invalidCredentialsError": "Incorrect email or password.",
+    "googleLoginButton": "LOGIN With Google"
+  },
+  "Countdown": {
+    "metaTitle": "Countdown",
+    "heroTitle": "The event will begin in"
+  },
+  "WriteKudo": {
+    "heading": "Send thanks and recognition to your teammate",
+    "recipientLabel": "Recipient",
+    "recipientPlaceholder": "Search",
+    "recipientAriaLabel": "Recipient",
+    "awardTitleLabel": "Award title",
+    "awardTitlePlaceholder": "Give your teammate an award title",
+    "awardTitleAriaLabel": "Award title",
+    "awardTitleHintExample": "Example: The person who motivates me.",
+    "awardTitleHintUsage": "The award title will be shown as your Kudos headline.",
+    "contentPlaceholder": "Share your thanks and recognition for your teammate here! ",
+    "contentAriaLabel": "Kudo content",
+    "mentionHint": "You can type “@ + name” to mention a colleague",
+    "mentionNoResults": "No matching Sunner found",
+    "toolbarBold": "Bold",
+    "toolbarItalic": "Italic",
+    "toolbarStrikethrough": "Strikethrough",
+    "toolbarNumberList": "Numbered list",
+    "toolbarLink": "Link",
+    "toolbarQuote": "Quote",
+    "linkPrompt": "Enter a link URL",
+    "communityStandard": "Community standards",
+    "hashtagLabel": "Hashtag",
+    "hashtagAddLabel": "Hashtag",
+    "hashtagMax": "Up to {max}",
+    "hashtagRemoveAriaLabel": "Remove hashtag {hashtag}",
+    "hashtagAddAriaLabel": "Add hashtag",
+    "hashtagSearchPlaceholder": "Search or create a new hashtag",
+    "hashtagCreateNew": "Create hashtag “{value}”",
+    "hashtagNoSuggestions": "No suggestions",
+    "imageLabel": "Image",
+    "imageAddLabel": "Image",
+    "imageMax": "Up to {max}",
+    "imageRemoveAriaLabel": "Remove {alt}",
+    "imageAddAriaLabel": "Add image",
+    "imageAlt": "Attached image {index}",
+    "anonymousLabel": "Send this thanks and recognition anonymously",
+    "anonymousNamePlaceholder": "Enter an anonymous display name",
+    "anonymousNameAriaLabel": "Anonymous display name",
+    "cancel": "Cancel",
+    "submit": "Send",
+    "submitting": "Sending...",
+    "errorReceiverRequired": "Please choose a recipient",
+    "errorReceiverNotFound": "This recipient could not be found",
+    "errorMessageRequired": "Please write a message",
+    "errorHashtagsCount": "Please choose between 1 and 5 hashtags",
+    "errorInvalidHashtag": "Hashtags cannot contain commas",
+    "errorAwardTitleRequired": "Please enter an award title",
+    "errorTooManyImages": "You can attach up to 5 images",
+    "errorInvalidImageType": "Only JPG or PNG images are supported",
+    "errorImageTooLarge": "Each image must be 5MB or smaller",
+    "errorUploadFailed": "Image upload failed, please try again",
+    "errorInsertFailed": "Sending your Kudo failed, please try again"
+  }
+}

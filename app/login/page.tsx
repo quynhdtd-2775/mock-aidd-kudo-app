@@ -1,12 +1,16 @@
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import { montserrat } from "./login-fonts";
 import { LoginHeader } from "./login-header";
 import { LoginHero } from "./login-hero";
 import { LoginFooter } from "./login-footer";
 
-export const metadata: Metadata = {
-  title: "Log in",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("Login");
+  return {
+    title: t("metaTitle"),
+  };
+}
 
 type LoginPageProps = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
@@ -14,7 +18,7 @@ type LoginPageProps = {
 
 export default async function LoginPage({ searchParams }: LoginPageProps) {
   const params = await searchParams;
-  const hasError = typeof params.error !== "undefined";
+  const error = typeof params.error === "string" ? params.error : null;
 
   return (
     <div
@@ -42,7 +46,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
       <LoginHeader />
 
       <main className="relative flex flex-1 items-center px-4 py-16 sm:px-10 md:px-16 lg:px-[144px]">
-        <LoginHero hasError={hasError} />
+        <LoginHero error={error} />
       </main>
 
       <LoginFooter />

@@ -1,0 +1,23 @@
+{
+  "score": 8,
+  "criticalCount": 0,
+  "decision": "SEALED",
+  "acceptanceCovered": [
+    "Language dropdown matches MoMorph Figma design — Track A agent visually validated open/closed/selection states against get_frame_image via Playwright screenshots",
+    "Selecting EN switches home page copy, html lang, and title to English; VN switches back — phase 04 e2e via Playwright on dev server (mock auth), round-trip verified",
+    "Locale persists via NEXT_LOCALE cookie for guests and profiles.language for logged-in users — cookie set verified e2e (now with 1-year maxAge); DB branch unit-tested in set-locale-action.test.ts / load-preferred-locale.test.ts",
+    "Migration adds profiles.language with owner-scoped RLS UPDATE policy — reviewer read 20260716090000_profile_language.sql: check constraint + auth.uid() = id policy confirmed",
+    "vi.json and en.json message catalogs have identical key sets — messages/message-keys.test.ts (8 tests) enforces parity",
+    "Full test suite passes and production build compiles clean — pnpm test 197/197 exit 0, pnpm build exit 0 after review fixes"
+  ],
+  "regressionChecked": [
+    "All existing routes still compile and render (build output lists every route; proxy middleware unaffected)",
+    "Vietnamese default render pixel-identical to pre-change home page (phase 03 screenshot comparison, including preserved 'Comming soon' typo)",
+    "proxy.ts and lib/supabase/middleware.ts untouched (git diff clean); existing middleware.test.ts still passing in suite",
+    "Pre-existing 160 non-i18n tests still pass (197 total = 160 prior + 37 new)"
+  ],
+  "contractStatus": "PASSED",
+  "refuted": [],
+  "unproven": [],
+  "reachableRegressions": []
+}
