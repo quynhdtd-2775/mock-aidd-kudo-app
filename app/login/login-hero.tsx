@@ -1,7 +1,10 @@
+/* eslint-disable @next/next/no-img-element */
+import { getTranslations } from "next-intl/server";
 import { GoogleLoginButton } from "./google-login-button";
 
 type LoginHeroProps = {
-  hasError: boolean;
+  /** Error kind from the OAuth flow: "cancelled" | anything else = failure. */
+  error: string | null;
 };
 
 /**
@@ -9,7 +12,9 @@ type LoginHeroProps = {
  * button, and (when the OAuth callback redirected back with an error)
  * an inline failure message.
  */
-export function LoginHero({ hasError }: LoginHeroProps) {
+export async function LoginHero({ error }: LoginHeroProps) {
+  const t = await getTranslations("Login");
+
   return (
     <div className="flex flex-col gap-10 lg:gap-20">
       <img
@@ -17,22 +22,20 @@ export function LoginHero({ hasError }: LoginHeroProps) {
         alt="ROOT FURTHER"
         width={451}
         height={200}
-        className="h-auto w-[220px] sm:w-[320px] lg:w-[451px]"
+        className="h-auto w-55 sm:w-[320px] lg:w-112.75"
       />
 
       <div className="flex flex-col gap-6 pl-4">
         <p className="max-w-[480px] text-[20px] font-bold leading-[40px] tracking-[0.5px] text-white">
-          Bắt đầu hành trình của bạn cùng SAA 2025.
+          {t("taglineLine1")}
           <br />
-          Đăng nhập để khám phá!
+          {t("taglineLine2")}
         </p>
 
         <GoogleLoginButton />
 
-        {hasError ? (
-          <p className="text-sm text-white">
-            Đăng nhập thất bại. Vui lòng thử lại.
-          </p>
+        {error ? (
+          <p className="text-sm text-white">{t("loginFailedError")}</p>
         ) : null}
       </div>
     </div>

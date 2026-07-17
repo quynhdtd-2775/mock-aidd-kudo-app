@@ -1,0 +1,32 @@
+{
+  "commands": [
+    {
+      "command": "pnpm test",
+      "exitCode": 0,
+      "status": "pass",
+      "summary": "vitest run: 2 test files, 24/24 tests passed (profile-view-mappers, current-user)",
+      "ts": "2026-07-14T07:44:36Z"
+    },
+    {
+      "command": "pnpm exec tsc --noEmit",
+      "exitCode": 0,
+      "status": "pass",
+      "summary": "TypeScript project-wide type-check clean",
+      "ts": "2026-07-14T07:44:36Z"
+    },
+    {
+      "command": "pnpm exec eslint lib/profile app/profile components/profile vitest.config.ts",
+      "exitCode": 0,
+      "status": "pass",
+      "summary": "Feature-scoped lint clean (repo-wide lint has 839 pre-existing problems in untouched files)",
+      "ts": "2026-07-14T07:44:36Z"
+    },
+    {
+      "command": "curl -s -o /dev/null -w %{http_code} http://localhost:3000/profile",
+      "exitCode": 0,
+      "status": "pass",
+      "summary": "HTTP 200; page renders safe empty state (local Supabase down — Docker not installed, live-DB path deferred)",
+      "ts": "2026-07-14T07:44:36Z"
+    }
+  ]
+}

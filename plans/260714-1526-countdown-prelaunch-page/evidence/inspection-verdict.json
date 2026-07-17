@@ -1,0 +1,23 @@
+{
+  "score": 9,
+  "criticalCount": 0,
+  "decision": "SEALED",
+  "acceptanceCovered": [
+    "countdown page renders DAYS/HOURS/MINUTES ticking to launch_at",
+    "public access without login",
+    "nav lock redirects other routes before launch and lifts after",
+    "at-zero client redirect to home fires once",
+    "DB-down fail-open: no lock and static 00 display",
+    "full test suite passes"
+  ],
+  "regressionChecked": [
+    "auth-gate redirects for existing routes (login, home-page-saa, profile) — verified via lib/supabase/middleware.test.ts Scenarios 2-4 and Edge cases; PUBLIC_PATHS array is shared identically between mock-auth and real-Supabase branches (lib/supabase/middleware.ts:12,35-37,79-81) so the fix applies to both without needing separate coverage",
+    "login flow reachability before launch — covered by middleware.test.ts (login allowlisted both before/after launch, authenticated /login -> /home-page-saa redirect tests pass)",
+    "session cookie refresh in updateSession (withRefreshedCookies) — code path unchanged by the fix; not directly unit-tested (mocked getUser returns null) but structurally untouched, low risk",
+    "public anonymous access to the countdown page — verified via middleware.test.ts Scenario 1 and the dedicated 'Critical regression: /count-down-prelaunch in PUBLIC_PATHS' test, plus direct code read of lib/supabase/middleware.ts:10-12"
+  ],
+  "contractStatus": "OK",
+  "refuted": [],
+  "unproven": [],
+  "reachableRegressions": []
+}

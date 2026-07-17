@@ -1,0 +1,22 @@
+{
+  "score": 7,
+  "criticalCount": 0,
+  "decision": "SEALED",
+  "acceptanceCovered": [
+    "Project type-checks with no errors (tsc --noEmit exit 0) including the new lib/profile, app/profile and components/profile files — verified by reviewer and re-run after post-review fixes, exit 0",
+    "Unit tests for the profile data/mapping layer pass (vitest, 24 tests: view mappers incl. vi-VN formatting and Asia/Ho_Chi_Minh time, current-user DISABLE_AUTH demo fallback) — tester agent set up vitest and ran 24/24 green; re-run green after avatar-plumbing fix",
+    "Feature-scoped lint is clean (eslint over lib/profile, app/profile, components/profile, vitest.config.ts exits 0) — reviewer's lint finding (31 no-explicit-any in current-user.test.ts) fixed via scoped test-only disable; re-run exit 0",
+    "/profile responds HTTP 200 on the dev server and renders a safe empty state (no crash) when the local Supabase stack is unreachable — curl returned 200 with the empty-state copy rendered"
+  ],
+  "regressionChecked": [
+    "No existing route files modified; /profile is additive (git status: only new files plus profile-badges-row/profile-kudo-post-card extensions)",
+    "profile-badges-row icons prop is optional with the previous badgeCount default — prior callers unaffected (tsc clean)",
+    "profile-kudo-post-card avatar props optional, falling back to the previously hardcoded sample avatars — mock rendering unchanged",
+    "Reused kudos-live-board components imported without edits; project-wide tsc confirms no consumer broke",
+    "supabase/ directory is brand new — no existing migration or schema touched"
+  ],
+  "contractStatus": "PASS",
+  "refuted": [],
+  "unproven": [],
+  "reachableRegressions": []
+}

@@ -1,0 +1,41 @@
+{
+  "task": "Implement the Countdown Prelaunch page at /count-down-prelaunch from the MoMorph design (screen 8PJQswPZmU), backed by local Supabase (event_settings.launch_at), with a pre-launch navigation lock and at-zero redirect",
+  "mode": "interactive",
+  "acceptanceCriteria": [
+    "countdown page renders DAYS/HOURS/MINUTES ticking to launch_at",
+    "public access without login",
+    "nav lock redirects other routes before launch and lifts after",
+    "at-zero client redirect to home fires once",
+    "DB-down fail-open: no lock and static 00 display",
+    "full test suite passes"
+  ],
+  "touchpoints": [
+    "supabase/migrations/20260714080000_event_settings.sql",
+    "lib/countdown/countdown-types.ts",
+    "lib/countdown/event-settings-queries.ts",
+    "lib/countdown/launch-at-cache.ts",
+    "lib/countdown/nav-lock.ts",
+    "lib/countdown/countdown-math.ts",
+    "lib/countdown/use-countdown.ts",
+    "lib/supabase/middleware.ts",
+    "app/count-down-prelaunch/page.tsx",
+    "app/count-down-prelaunch/countdown-display.tsx",
+    "app/count-down-prelaunch/countdown-unit.tsx",
+    "app/count-down-prelaunch/countdown-digit-box.tsx",
+    "app/count-down-prelaunch/countdown-fonts.ts",
+    "lib/countdown/countdown-math.test.ts",
+    "lib/countdown/nav-lock.test.ts",
+    "lib/countdown/launch-at-cache.test.ts",
+    "lib/supabase/middleware.test.ts"
+  ],
+  "blastRadius": [
+    "auth-gate redirects for existing routes (login, home-page-saa, profile)",
+    "login flow reachability before launch",
+    "session cookie refresh in updateSession",
+    "public anonymous access to the countdown page"
+  ],
+  "contracts": [
+    "pnpm vitest run",
+    "pnpm tsc --noEmit"
+  ]
+}

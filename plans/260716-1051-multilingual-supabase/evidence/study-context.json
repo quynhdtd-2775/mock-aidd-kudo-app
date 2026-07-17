@@ -1,0 +1,35 @@
+{
+  "task": "Implement multilingual (VN/EN) support: MoMorph language dropdown (screen hUyaaugye2), next-intl cookie-based i18n without URL prefix, Supabase-persisted user language preference, home page + header/footer translated",
+  "mode": "takumi interactive (SDD off), MoMorph two-track",
+  "acceptanceCriteria": [
+    "Language dropdown matches MoMorph Figma design",
+    "Selecting EN switches home page copy, html lang, and title to English; VN switches back",
+    "Locale persists via NEXT_LOCALE cookie for guests and profiles.language for logged-in users",
+    "Migration adds profiles.language with owner-scoped RLS UPDATE policy",
+    "vi.json and en.json message catalogs have identical key sets",
+    "Full test suite passes and production build compiles clean"
+  ],
+  "touchpoints": [
+    "lib/i18n/*",
+    "i18n/request.ts",
+    "next.config.ts",
+    "app/layout.tsx",
+    "messages/vi.json",
+    "messages/en.json",
+    "supabase/migrations/20260716090000_profile_language.sql",
+    "supabase/seed.sql",
+    "components/language-dropdown/*",
+    "components/home/*",
+    "app/home-page-saa/page.tsx"
+  ],
+  "blastRadius": [
+    "All routes render through app/layout.tsx provider",
+    "proxy.ts / Supabase session flow untouched",
+    "Non-home pages keep hardcoded copy by scope decision"
+  ],
+  "contracts": [
+    "LanguageDropdown props { value, onSelect, ariaLabel?, className? }",
+    "Locale union sourced solely from lib/i18n/locale-config.ts",
+    "Locale precedence: cookie > profiles.language > 'vi'"
+  ]
+}

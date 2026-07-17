@@ -1,0 +1,25 @@
+{
+  "commands": [
+    {
+      "command": "pnpm test",
+      "exitCode": 0,
+      "status": "pass",
+      "summary": "Vitest: 197 passed (197), 10 files — includes 37 i18n tests (locale-config 15, message-keys 8, set-locale-action 6, load-preferred-locale 8)",
+      "ts": "2026-07-16T05:06:51Z"
+    },
+    {
+      "command": "pnpm build",
+      "exitCode": 0,
+      "status": "pass",
+      "summary": "Next.js 16 production build compiled successfully; TypeScript finished clean; all routes generated",
+      "ts": "2026-07-16T05:06:51Z"
+    },
+    {
+      "command": "npx supabase db reset (apply migration locally)",
+      "exitCode": 0,
+      "status": "skipped",
+      "summary": "Docker daemon not running on this machine — migration SQL convention-reviewed instead; follow-up: apply when Docker is up",
+      "ts": "2026-07-16T05:06:51Z"
+    }
+  ]
+}

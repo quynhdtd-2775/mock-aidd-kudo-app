@@ -1,3 +1,4 @@
+import { getTranslations } from "next-intl/server";
 import { loginWithGoogle } from "./actions";
 
 /**
@@ -5,7 +6,9 @@ import { loginWithGoogle } from "./actions";
  * Submits a server action that kicks off Google OAuth (implemented by the
  * backend track in ./actions).
  */
-export function GoogleLoginButton() {
+export async function GoogleLoginButton() {
+  const t = await getTranslations("Login");
+
   return (
     <form action={loginWithGoogle}>
       <button
@@ -13,7 +16,7 @@ export function GoogleLoginButton() {
         className="flex items-center gap-2 rounded-[8px] bg-[#ffea9e] px-6 py-4 transition-opacity hover:opacity-90"
       >
         <span className="text-[22px] font-bold leading-7 text-[#00101a]">
-          LOGIN With Google
+          {t("googleLoginButton")}
         </span>
         <img
           src="/login/google-icon.svg"
