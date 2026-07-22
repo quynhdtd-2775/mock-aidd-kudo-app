@@ -1,0 +1,23 @@
+{
+ "score": 8.0,
+ "criticalCount": 0,
+ "decision": "SEALED",
+ "acceptanceCovered": [
+  "Heart toggle: like inserts kudo_hearts row and increments kudos.hearts_count; unlike deletes and decrements \u2014 live-verified in browser + psql",
+  "One like per user per kudo enforced (composite PK) and 23505 race resolves as already-liked \u2014 reviewer re-review confirmed 23505-specific branch (23503 still fails)",
+  "Sender cannot like own kudo: UI disabled, action rejects, RLS insert policy blocks \u2014 tester verified 3 layers; real usage shows 0 self-like rows",
+  "hearts_value bounded by CHECK constraint (1,2); trigger branches floored at 0 \u2014 live psql: -5 and 999999 rejected as superuser, 2 accepted",
+  "Feed carries likedByMe (page-scoped query) and isOwnKudo without leaking anonymous sender identity \u2014 reviewer verified no senderId in KudoPostData, test guards it",
+  "Full vitest suite green; tsc clean; eslint clean; build passes \u2014 330/330, exit 0 each (temper-results.json), pnpm build pass (tester)"
+ ],
+ "regressionChecked": [
+  "highlight carousel mock rows unaffected (static fallback branch, reviewer confirmed)",
+  "profile hearts-received stat consistent via trigger-synced hearts_count",
+  "anonymous-kudo anonymization invariant intact after senderId feed enrichment",
+  "existing 310-test baseline still green within 330"
+ ],
+ "contractStatus": "KudoPostData optional-only; kudos.hearts_count trigger-owned; toggle result contract stable",
+ "refuted": [],
+ "unproven": [],
+ "reachableRegressions": []
+}

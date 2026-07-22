@@ -35,6 +35,11 @@ iteration was replaced by this flow).
 5. Session cookies are set by the Supabase SSR client during the exchange and refreshed on every
    request afterward by the proxy/middleware layer below.
 
+Since `supabase/migrations/20260722090000_create_profile_on_signup.sql`, a matching `profiles`
+row is auto-created for every new `auth.users` insert (trigger `handle_new_user()`, `SECURITY
+DEFINER`) — see Database Schema below. Before this migration, a real (non-mock) first sign-in had
+no `profiles` row and any `kudos` insert by that user failed with `23503`.
+
 ## Session Middleware (Next 16 `proxy.ts`)
 
 Next 16 renamed the middleware convention to `proxy.ts` (see `AGENTS.md` — breaking change vs.
@@ -121,29 +126,38 @@ supported`). Local-dev workaround for Colima-based Docker; re-enable if running 
 Defined in `supabase/migrations/20260714070000_profile_schema.sql`, seeded via `supabase/seed.sql`.
 Backs the `/profile` route (`lib/profile/profile-queries.ts`). Extended by
 `supabase/migrations/20260716090000_profile_language.sql` (adds `profiles.language`, see
-Internationalization above) and `supabase/migrations/20260716100000_write_kudos.sql` (adds
+Internationalization above), `supabase/migrations/20260716100000_write_kudos.sql` (adds
 `kudos.is_anonymous`/`anonymous_name`/`image_urls`, a sender-scoped insert policy, and the public
-`kudos-images` Storage bucket used by the write-kudos modal's upload flow). Table-level
-privileges — a separate layer from RLS — come from
+`kudos-images` Storage bucket used by the write-kudos modal's upload flow),
+`supabase/migrations/20260722090000_create_profile_on_signup.sql` (`SECURITY DEFINER` trigger
+`handle_new_user()` on `auth.users` insert auto-creates the matching `profiles` row — display name
+from OAuth `full_name`/`name` metadata, falling back to the email local-part — plus a one-time
+backfill for any pre-existing `auth.users` row with no `profiles` row; see Auth Flow above), and
+`supabase/migrations/20260722100000_kudo_hearts.sql` (adds the `kudo_hearts` table; see Kudos Feed
+below). Table-level privileges — a separate layer from RLS — come from
 `supabase/migrations/20260722070000_grant_table_privileges.sql`; see Kudos Feed below for why
 that migration exists.
 
 | Table | Purpose |
 |---|---|
-| `profiles` | One row per `auth.users` id — display name, hero code/badge, avatar, boxes opened/unopened, `language` (`'vi'` \| `'en'`, default `'vi'`) |
+| `profiles` | One row per `auth.users` id — display name, hero code/badge, avatar, boxes opened/unopened, `language` (`'vi'` \| `'en'`, default `'vi'`). Auto-created on sign-up (see Auth Flow above) |
 | `kudos` | Sender → receiver messages with hashtags, attachment count, `hearts_count`, `is_spam` flag, `is_anonymous`/`anonymous_name` (anonymous send), `image_urls` (uploaded to the `kudos-images` Storage bucket) |
 | `secret_box_icons` | Catalog of unlockable icons (name, image, sort order) |
 | `user_icon_unlocks` | Join table: which icons a user has unlocked, and when |
+| `kudo_hearts` | One row per (kudo, liker), PK `(kudo_id, user_id)` — `hearts_value` (`1` normal, `2` reserved for a not-yet-implemented admin "special day" doubling), `created_at`. A `SECURITY DEFINER` trigger keeps `kudos.hearts_count` in sync; see Kudos Feed below |
 
-RLS is enabled on all four tables with permissive `SELECT` policies for `anon`/`authenticated`
-(local-dev only). Two narrower write policies sit on top: the owner-scoped `UPDATE` policy on
+RLS is enabled on all tables with permissive `SELECT` policies for `anon`/`authenticated`
+(local-dev only). Narrower write policies sit on top: the owner-scoped `UPDATE` policy on
 `profiles` (`using (auth.uid() = id) with check (auth.uid() = id)`, added alongside the
-`language` column) so a logged-in user can persist their own language preference, and the
+`language` column) so a logged-in user can persist their own language preference, the
 sender-scoped `INSERT` policy on `kudos` (`with check (sender_id = auth.uid())`) from the
-write-kudos migration. **Do not ship this RLS setup to production as-is.** RLS is necessary but
-not sufficient for access — table-level `GRANT`s are a separate Postgres layer (see Kudos Feed
-below); a table with RLS policies but no `GRANT` still rejects every query with `42501`.
-`lib/profile/profile-queries.ts` returns safe empty results on query error rather than throwing.
+write-kudos migration, and the `kudo_hearts` policies described in Kudos Feed below (the only
+ones in this schema that are scoped tightly enough to be more than a local-dev placeholder).
+**Do not ship the `profiles`/`kudos`/`secret_box_icons`/`user_icon_unlocks` permissive-read RLS as-is
+to production.** RLS is necessary but not sufficient for access — table-level `GRANT`s are a
+separate Postgres layer (see Kudos Feed below); a table with RLS policies but no `GRANT` still
+rejects every query with `42501`. `lib/profile/profile-queries.ts` returns safe empty results on
+query error rather than throwing.
 
 Defined separately in `supabase/migrations/20260714080000_event_settings.sql`. Backs the
 countdown nav-lock and `/count-down-prelaunch` (`lib/countdown/event-settings-queries.ts`).
@@ -163,6 +177,9 @@ The ALL KUDOS feed renders real `kudos` rows (previously mock data):
   with sender + receiver `profiles` (display name, hero code/badge, avatar). Returns `[]` on any
   query error so the page still renders its empty state instead of crashing if the local
   Supabase stack is down or a permissions regression reintroduces the `42501` error below.
+  Also enriches each row with `likedByMe` (has the current viewer already hearted this kudo —
+  one extra `kudo_hearts` query scoped to `user_id = uid` and the page's fetched kudo ids, so a
+  long like history can't grow the query unbounded) and `isOwnKudo` (`sender_id === uid`).
 - `lib/kudos/kudo-feed-mapper.ts` (`toKudoFeedCards`) — pure, server-only mapper to
   `KudoPostData` (the feed card's prop shape). For `is_anonymous` rows, the joined `sender`
   profile is simply never read — real name/hero/avatar never reach the mapped card — and
@@ -177,6 +194,42 @@ The ALL KUDOS feed renders real `kudos` rows (previously mock data):
 - Still mock: the highlight banner, spotlight panel, and the `StatsOverviewPanel` /
   `GiftReceiversPanel` sidebar (`kudo-posts-data.ts` mock arrays) — only the main feed column
   reads from the database.
+
+### Hearts (like) system
+
+Every ALL KUDOS card carries a heart/like control
+(`components/kudos-live-board/heart-button.tsx`), backed by the `kudo_hearts` table
+(`supabase/migrations/20260722100000_kudo_hearts.sql`, PK `(kudo_id, user_id)` — one row per
+kudo-per-liker):
+
+- **Toggle action** — `toggleKudoHeart(kudoId)` (`app/kudos-live-board/actions.ts`) rejects
+  self-like (`{ ok: false, error: "self_like" }`), then inserts (like) or deletes (unlike) the
+  `kudo_hearts` row depending on whether one already exists for that user. A `23505`
+  unique-violation on insert — lost the read-then-write race to a concurrent toggle (multi-tab,
+  rapid click) — is treated as "already liked", not a failure. Re-reads `kudos.hearts_count`
+  after the write and returns it, so the client reconciles against the trigger-updated value
+  instead of incrementing/decrementing client-side.
+- **Sync trigger** — `sync_kudo_hearts_count()` (`SECURITY DEFINER`, fires on `kudo_hearts`
+  insert/delete) adds/subtracts `hearts_value` from `kudos.hearts_count`, floored at 0 on both
+  branches. This is the single source of truth for the counter — the server action never writes
+  `hearts_count` directly, so the two can't drift. The `/profile` "Hearts received" stat
+  (`lib/profile/profile-queries.ts`, sums `hearts_count` across a user's received kudos) reflects
+  hearts changes automatically through this same counter.
+- **`hearts_value`** defaults to `1` and is DB-`check`-constrained to `(1, 2)` — `2` is reserved
+  for a future admin "special day" double-hearts feature; the column/constraint are in place but
+  no UI or action sets it to `2` anywhere in the app today.
+- **UI** — `heart-button.tsx` (client component): optimistic color flip (`#999999` unliked →
+  `#D4271D` liked) and count update on click, reconciled against the server response (or
+  reverted on error), `aria-pressed`/`aria-label` reflect liked state, `disabled` for the
+  viewer's own kudo. Disabling is UX-only — the enforced guards are the self-like rejection in
+  `toggleKudoHeart` and the RLS `INSERT` policy below. The highlight carousel is unaffected —
+  it still renders mock data.
+- **RLS** — `SELECT` open to `anon`/`authenticated`; `INSERT` requires `user_id = auth.uid()`
+  **and** rejects self-liking (`auth.uid() <> (select sender_id from kudos where id = kudo_id)`);
+  `DELETE` requires `user_id = auth.uid()`. Explicit `GRANT insert, delete` to `authenticated`
+  sits on top (composite PK → no sequence grant needed). The mock-auth dev path writes through
+  the service-role client, which bypasses RLS entirely — self-like/one-per-user rules are
+  re-enforced in `toggleKudoHeart`'s own code as defense-in-depth, not just at the DB layer.
 
 **Local-dev permissions gotcha:** an RLS policy is not enough on its own — Postgres also
 requires an explicit `GRANT` on the table for the querying role, and the original schema
@@ -246,14 +299,17 @@ exist; the same path serves either language based on the resolved locale).
 ## Known Gaps (not yet addressed by this feature)
 
 - No sign-out action exists yet.
-- `supabase/migrations/*.sql` RLS policies are permissive-read for local dev, with two narrow
-  write exceptions (`profiles` self-`UPDATE`, `kudos` sender-scoped `INSERT` — see Database
-  Schema above); a production-safe RLS model (and the table `GRANT`s layered on top, see Kudos
-  Feed above) is not defined yet. This includes `event_settings`, which still has no write
-  policy at all.
+- `supabase/migrations/*.sql` RLS policies are permissive-read for local dev, with narrow write
+  exceptions (`profiles` self-`UPDATE`, `kudos` sender-scoped `INSERT`, `kudo_hearts`
+  self/not-own-kudo `INSERT` + self `DELETE` — see Database Schema above); a production-safe RLS
+  model (and the table `GRANT`s layered on top, see Kudos Feed above) is not defined yet for the
+  other tables. This includes `event_settings`, which still has no write policy at all.
 - Anonymous kudos are anonymized only at the app's read layer, not the database layer — see
   "Known gap" under Kudos Feed above (direct PostgREST access with the anon key can still read
   `sender_id` on an anonymous row).
 - The nav-lock's `launch_at` cache (`lib/countdown/launch-at-cache.ts`) is a module-level
   in-process cache — safe for a single server instance (local/dev); a multi-instance production
   deploy would need a shared cache or a shorter TTL to keep instances in sync.
+- `kudo_hearts.hearts_value = 2` (admin "special day" doubling) is schema-ready — the column and
+  `check (hearts_value in (1, 2))` constraint exist and the sync trigger already handles it — but
+  no UI or server action sets it yet; see Kudos Feed above.

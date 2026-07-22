@@ -1,0 +1,29 @@
+{
+ "task": "Hearts/like on /kudos-live-board per MoMorph spec C.4.1 (screen MaZUn5xHXZ): toggle like with count sync, one per user, sender cannot self-like, hearts credit kudo sender, schema-ready for special-day x2",
+ "mode": "takumi interactive, SDD off, scope narrowed by user to hearts only",
+ "acceptanceCriteria": [
+  "Heart toggle: like inserts kudo_hearts row and increments kudos.hearts_count; unlike deletes and decrements",
+  "One like per user per kudo enforced (composite PK) and 23505 race resolves as already-liked",
+  "Sender cannot like own kudo: UI disabled, action rejects, RLS insert policy blocks",
+  "hearts_value bounded by CHECK constraint (1,2); trigger branches floored at 0",
+  "Feed carries likedByMe (page-scoped query) and isOwnKudo without leaking anonymous sender identity",
+  "Full vitest suite green; tsc clean; eslint clean; build passes"
+ ],
+ "touchpoints": [
+  "supabase/migrations/20260722100000_kudo_hearts.sql",
+  "app/kudos-live-board/actions.ts",
+  "lib/kudos/{kudos-feed-queries,kudo-feed-mapper,kudos-types}.ts",
+  "components/kudos-live-board/{heart-button,kudo-post-card,kudo-posts-data}",
+  "messages/{vi,en}.json"
+ ],
+ "blastRadius": [
+  "profile page hearts-received stat (reads kudos.hearts_count \u2014 trigger keeps in sync)",
+  "highlight carousel mock rows (must stay static)",
+  "anonymous kudos anonymization invariant in feed mapper"
+ ],
+ "contracts": [
+  "KudoPostData extended optional-only (heartsValue/heartsLiked/isOwnKudo)",
+  "toggleKudoHeart returns {ok, liked, heartsCount} | {ok:false, error: HeartErrorCode}",
+  "kudos.hearts_count written ONLY by the trigger"
+ ]
+}
