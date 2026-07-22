@@ -1,1 +1,2 @@
 - [Docs bootstrap decision](project_docs-bootstrap.md) — docs/ started with one system-architecture.md for login/auth; extend it, don't fragment, until app grows.
+- [Kudos feature doc drift](project_kudos-feature-doc-drift.md) — check ALL migrations touching a documented table, not just this session's diff; earlier features silently ship undocumented schema/RLS changes.
