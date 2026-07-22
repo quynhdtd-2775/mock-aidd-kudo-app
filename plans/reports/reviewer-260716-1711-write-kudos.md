@@ -173,3 +173,133 @@ picker, half a point for MINOR-5 remaining open (by design).
 
 **Status:** DONE
 
+---
+
+## Session 260722 delta review — grants migration + ALL KUDOS live feed
+
+Scope (uncommitted, `git status --short` on `feat.some-page`): `supabase/migrations/20260722070000_grant_table_privileges.sql`
+(new), `supabase/config.toml` (analytics disabled), `lib/format/kudo-display-format.ts` + `.test.ts` (new, extracted from
+`lib/profile/profile-view-mappers.ts`), `lib/kudos/kudos-feed-queries.ts` (new), `lib/kudos/kudo-feed-mapper.ts` +
+`.test.ts` (new), `lib/kudos/kudos-types.ts` (feed types), `lib/profile/profile-view-mappers.ts` (import re-point),
+`components/kudos-live-board/{live-board-all-kudos.tsx,kudo-post-card.tsx,kudo-posts-data.ts}`,
+`messages/{vi,en}.json` (`LiveBoard.allKudosEmpty`), `supabase/seed.sql` (HTML-ified messages, `image_urls`, anonymous row).
+
+Independently re-verified: `pnpm exec tsc --noEmit` (exit 0, clean), `pnpm exec eslint lib/kudos lib/format lib/profile
+components/kudos-live-board app/kudos-live-board` (exit 0, clean), `pnpm exec vitest run` → 19 files / 310 tests passed.
+Matches the coordinator's claimed numbers. Did not re-verify the live browser round-trip (task marked that
+live-verified already) — took it as given.
+
+### Spot-check of the 5 prior fixes (untouched by today's diff, confirmed still present)
+
+| Fix | File | Verdict |
+|---|---|---|
+| Recipient selection carries explicit id | `components/kudos/write-kudo/recipient-selection-state.ts:15,24-25,32-33` | Present — `applyQueryChange` nulls `selectedId`, `applySelection` sets both fields from an explicit `RecipientOption` only |
+| Magic-byte sniffing on upload | `lib/kudos/upload-kudo-images.ts:40,69,71` | Present — `sniffImageType()` still gates upload, rejects on mismatch |
+| Uid-scoped storage insert policy | `supabase/migrations/20260716100000_write_kudos.sql:26-31` | Present — `with check (bucket_id = 'kudos-images' and (storage.foldername(name))[1] = auth.uid()::text)` |
+| Protocol-relative href rejection | `lib/kudos/sanitize-message-html.ts:14` | Present — `SAFE_HREF_PROTOCOL = /^(https?:|mailto:|#|\/(?!\/))/i` unchanged |
+| `invalid_hashtag` comma rejection | `app/kudos-live-board/actions.ts:75-76` | Present — `hashtags.some((tag) => tag.includes(","))` still gates before insert |
+
+None of these files appear in today's diff, so no regression risk here — confirmed by direct read, not just diff absence.
+
+### Major
+
+1. **`getAllKudos` silently swallows PostgREST-level errors — no logging at all, not even the `error` object —
+   `lib/kudos/kudos-feed-queries.ts:36-46`**
+   ```ts
+   const { data, error } = await supabase.from("kudos").select(...)...;
+   if (error || !data) return [];
+   ```
+   The `try/catch` around this only catches *thrown* exceptions (e.g. network failure before a response arrives) and
+   logs those via `console.error("getAllKudos: query failed", err)` (line 63). But a Postgres/PostgREST error returned
+   as data (exactly the `42501 permission denied` class of error that motivated today's grants migration — see the
+   migration's own comment "every anon/authenticated read failed with 42501") does **not** throw; it resolves normally
+   with `{ data: null, error: {...} }`. That branch is checked but never logged before falling through to `return [];`.
+   Net effect: if the grants config ever regresses (a future migration narrows a GRANT, a `REVOKE` lands, RLS gets
+   tightened), the ALL KUDOS feed will silently render the "no kudos yet" empty state — indistinguishable from a
+   genuinely empty table — with **zero server-side signal** that anything is wrong. This is the same failure mode the
+   team just spent a live-verification session diagnosing blind; right now a recurrence would be just as invisible.
+   Recommend: `if (error) { console.error("getAllKudos: query failed", error); return []; }` (log the error object, not
+   just the caught-exception path) — ideally paired with real error telemetry before this ships beyond local dev.
+
+2. **Grants migration converts the pre-existing "anonymous sender_id leak" from latent to practically live —
+   `supabase/migrations/20260722070000_grant_table_privileges.sql:10`, `lib/kudos/kudo-feed-mapper.ts:29-38`**
+   `grant select on all tables in schema public to anon, authenticated` matches the existing "readable by all" RLS
+   posture on all 5 public tables (confirmed: `profiles`, `kudos`, `secret_box_icons`, `user_icon_unlocks` in
+   `20260714070000_profile_schema.sql:58-64`, `event_settings` in `20260714080000_event_settings.sql:22-23` — all
+   identical `for select to anon, authenticated using (true)`), so this migration itself introduces no *new* table
+   over-exposure — it's completing a posture that was already the explicit (if commented "do NOT ship to prod as-is")
+   design intent. However: **before this migration, the missing GRANT meant literally nothing was readable via
+   PostgREST — including `kudos.sender_id` on anonymous rows.** The anonymization in `toKudoFeedCards()` is
+   app-layer-only (the joined `sender` object is simply never read into the card when `item.isAnonymous`); Postgres RLS
+   filters *rows*, not *columns*, so `kudos readable by all` was always going to expose `sender_id` in full once reads
+   worked at all. This migration is what makes `sender_id` on an anonymous kudos row now genuinely fetchable by anyone
+   holding the anon key via a direct REST call (`/rest/v1/kudos?select=sender_id,is_anonymous&is_anonymous=eq.true`),
+   defeating the entire point of the anonymous-post feature for a moderately technical user. Per the task framing this
+   is a pre-existing schema-design gap, not a new bug to fix now — but it is worth being precise that today's delta is
+   what activates it. Recommend (do not implement): stop granting `select` on `public.kudos` directly to
+   `anon`/`authenticated`; instead expose a `security_invoker` view (e.g. `kudos_public`) that projects
+   `case when is_anonymous then null else sender_id end as sender_id`, revoke direct table select for those roles, and
+   grant select on the view instead. Column-level `GRANT SELECT (col, col) ON kudos TO anon` doesn't help here since it
+   can't be conditioned on `is_anonymous`'s value per-row.
+
+### Minor
+
+3. **Dead code: `KUDO_POSTS` in `components/kudos-live-board/kudo-posts-data.ts:35-100`** — no longer imported anywhere
+   (`live-board-all-kudos.tsx` now calls `getAllKudos()`/`toKudoFeedCards()`; only the `KudoPostData` type export is
+   still consumed). ~65 lines of unused mock data. YAGNI — remove, or repurpose explicitly as a Storybook/test fixture
+   if still wanted for that.
+4. Grants migration's blanket table-select posture (Major #2 above) is a repeat of the same "local-dev only, revisit
+   before real deployment" caveat already on record in `20260714070000_profile_schema.sql:51-52` and
+   `20260714080000_event_settings.sql:17-19` — flagging again here so it doesn't get lost as the migration count grows.
+
+### Nit
+
+5. `kudo-post-card.tsx` keys the real `imageUrls` map on `src + index` — fine in practice (real storage URLs are unique
+   per upload), but `src` alone would be a more meaningful key if two rows could ever share a URL; not a real risk today.
+
+### Correctness verification (delta-specific)
+
+- **Mapper anonymization completeness** (`lib/kudos/kudo-feed-mapper.ts:29-38`): direct read + test suite
+  (`kudo-feed-mapper.test.ts:55-76`) confirm `senderName`/`senderHeroCode`/`senderBadge`/`senderAvatarSrc` are all
+  replaced/defaulted when `isAnonymous`, `receiver` fields are left untouched (correct — only the sender is
+  anonymized), and the joined `sender.displayName` is asserted to never leak into the card
+  (`expect(card.senderName).not.toBe(SENDER.displayName)`). Solid.
+- **`formatHashtagsDisplay` legacy vs comma-joined** (`lib/format` — actually `lib/kudos/kudo-feed-mapper.ts:13-20`):
+  correctly idempotent on legacy pre-formatted seed strings (`"#Dedicated #Inspring..."` → unchanged, no double `#`,
+  no comma to split on) and correctly expands modal-written comma-joined bare tags (`"LiveTest,TeamWork"` →
+  `"#LiveTest #TeamWork"`); trims and drops empty segments. Tests cover all three cases.
+- **Empty-feed state**: `live-board-all-kudos.tsx:30-39` correctly gates on `cards.length > 0`, new `allKudosEmpty` key
+  present in both `en.json`/`vi.json` (parity enforced by the existing `messages/message-keys.test.ts`, part of the
+  310 green tests).
+- **`getAllKudos` error handling**: see Major #1 — the `[]`-on-error fallback itself (keeping the page rendering when
+  the DB read fails) is the right *behavior*; the gap is purely the missing log line.
+- **XSS / `dangerouslySetInnerHTML`** (`components/kudos-live-board/kudo-post-card.tsx:79-85`): only ever receives
+  `post.messageHtml`, which is populated exclusively by `sanitizeMessageHtml(item.message)` inside
+  `toKudoFeedCards()` (`kudo-feed-mapper.ts:53`) — no other code path sets `messageHtml`. Sanitization is re-applied at
+  *read* time regardless of how `message` got into the DB (modal writes already-sanitized HTML; `seed.sql` writes
+  hand-authored HTML directly, bypassing the app layer entirely) — `kudo-feed-mapper.test.ts:102-108`
+  ("re-sanitizes the message HTML on read (defense-in-depth)") directly proves a `<script>` + `onclick` payload
+  embedded in `message` gets stripped to `<p>hi</p>` before render. This is exactly the right defense-in-depth
+  posture given `seed.sql` and any future direct-DB writers don't go through `sanitize-message-html.ts` on write.
+
+### Regression check
+- `lib/profile/profile-view-mappers.ts` re-point to `lib/format/kudo-display-format.ts`: `formatCount`/`formatKudoTime`
+  extracted verbatim (byte-identical logic, confirmed by diff), all profile-page call sites (`profile-view-mappers.ts:48-52,73,78`)
+  updated to the new import — no behavior change, `tsc`/`vitest` confirm no breakage.
+- `kudo-posts-data.ts` `KudoPostData` interface gained 3 optional fields (`messageHtml`, `senderAvatarSrc`/`receiverAvatarSrc`,
+  `imageUrls`) — additive, optional, backward compatible with the (now-dead, see Minor #3) `KUDO_POSTS` mock array.
+- `kudo-post-card.tsx` avatar/image rendering: correctly falls back to the original static design assets
+  (`avatarSrc="/kudos-live-board/avatar-sender.png"` etc.) via `??` when real data is absent — no broken-image risk for
+  any row still missing profile/image data.
+- No prior review scope file (sanitizer allowlist, storage RLS, recipient selection, hashtag validation) was touched by
+  today's diff — confirmed by absence from `git status --short` and direct reads above.
+
+### Updated Score: 8/10
+A real production bug fixed correctly (missing GRANTs, the actual root cause, not a workaround), clean feed-wiring with
+solid mapper test coverage and correct XSS defense-in-depth at read time. Docked for one genuine Major (silent
+PostgREST-error swallowing that would hide a recurrence of the exact bug class this session just fixed) and for
+surfacing — now practically live rather than latent — the anonymous-sender-id read exposure, which is accurately
+flagged as pre-existing/by-design-for-now but should not go further without the view-based fix outlined above.
+
+**Status:** DONE_WITH_CONCERNS
+

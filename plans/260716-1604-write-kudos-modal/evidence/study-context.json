@@ -1,0 +1,32 @@
+{
+ "task": "Write Kudos modal end-to-end on /kudos-live-board with local Supabase: modal UI (done prior session, commit 4dd7dd4), this session: seed mock kudos, wire ALL KUDOS feed to real DB, fix table grants, live-verify write->display",
+ "mode": "takumi interactive, SDD off, MoMorph screen ihQ26W78P2",
+ "acceptanceCriteria": [
+  "Seeded kudos (incl 1 anonymous) render in ALL KUDOS feed from local Supabase",
+  "Anonymous rows never expose real sender identity in client payload/DOM",
+  "Modal submit (recipient+danh hieu+message+hashtag) persists a kudos row and it appears in feed after refresh",
+  "G\u1eedi disabled until required fields valid; field errors preserved on failed submit",
+  "Full vitest suite green; tsc clean; build passes",
+  "Highlight/spotlight/stats sections unchanged (still mock)"
+ ],
+ "touchpoints": [
+  "lib/kudos/*",
+  "lib/format/*",
+  "components/kudos-live-board/{live-board-all-kudos,kudo-post-card,kudo-posts-data}",
+  "app/kudos-live-board/actions.ts",
+  "supabase/migrations/20260722070000_grant_table_privileges.sql",
+  "supabase/seed.sql",
+  "supabase/config.toml",
+  "messages/{vi,en}.json"
+ ],
+ "blastRadius": [
+  "profile page formatters (extracted to lib/format, tests green)",
+  "all Supabase reads app-wide (grants migration unblocks profile page too)",
+  "storage RLS (unchanged this session)"
+ ],
+ "contracts": [
+  "KudoPostData extended with optional fields only \u2014 mock consumers unaffected",
+  "createKudo error codes unchanged",
+  "kudos.hashtags stays comma-joined bare tags; display formatting in mapper only"
+ ]
+}

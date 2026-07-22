@@ -11,8 +11,9 @@ Stack: Next.js 16.2.10 (App Router) + React 19 + Supabase (local, via `@supabase
 | `/auth/callback` | `app/auth/callback/route.ts` | Public. OAuth code-exchange endpoint (GET) |
 | `/profile` | `app/profile/page.tsx` | Gated. Server component rendering "Profile bản thân" (keyvisual/header, user info card, icon collection, stats, awards header, received-kudos posts). Renders a safe empty state (no crash) when unauthenticated or when the local Supabase project is unreachable |
 | `/count-down-prelaunch` | `app/count-down-prelaunch/page.tsx` | Public. Full-viewport LED-style countdown (DAYS/HOURS/MINUTES) to `event_settings.launch_at`. Before launch, the nav-lock (see Session Middleware below) redirects every other route here; after launch it redirects subpaths of itself to `/`. Degrades to a static "00 00 00" display when `launch_at` is unreadable (DB down) |
+| `/kudos-live-board` | `app/kudos-live-board/page.tsx` | Gated. ALL KUDOS feed — real `kudos` data; see Kudos Feed section below. Highlight banner, spotlight, and the stats/gift-receivers sidebar are still mock |
 
-Other gated routes exist under this branch (`/home-page-saa`, `/home-awards-page`, `/kudos-live-board`) — out of scope for this doc pass; documented here only where they intersect `/profile` routing (the post-login redirect target).
+Other gated routes exist under this branch (`/home-page-saa`, `/home-awards-page`) — out of scope for this doc pass; documented here only where they intersect `/profile` routing (the post-login redirect target).
 
 ## Auth Flow (Google OAuth via Supabase, PKCE)
 
@@ -79,7 +80,12 @@ components/actions, via `next/headers` cookies).
 Copy `.env.local.example` to `.env.local` and fill in from `supabase status` after `supabase start`:
 
 - `NEXT_PUBLIC_SUPABASE_URL`
-- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY` — must match the currently-running local stack; a stale/demo
+  JWT here fails as `PGRST301`, not a clear auth error.
+- `SUPABASE_SERVICE_ROLE_KEY` (server-only, never `NEXT_PUBLIC_*`) — required when
+  `AUTH_MODE=mock` (see Dev-only mock auth above): mock auth has no real Supabase session, so
+  kudo writes use the service-role client to bypass RLS. From the `supabase status`
+  "service_role key" line.
 
 Google provider must be configured on the **local Supabase project** (not in this app):
 
@@ -106,26 +112,38 @@ pnpm dlx supabase start
 pnpm dlx supabase db reset   # applies supabase/migrations/*.sql + supabase/seed.sql
 ```
 
+`supabase/config.toml` has `[analytics] enabled = false` — the analytics container mounts the
+Docker socket, which fails under Colima (`mount source path 'docker.sock': operation not
+supported`). Local-dev workaround for Colima-based Docker; re-enable if running Docker Desktop.
+
 ## Database Schema (Supabase, local)
 
 Defined in `supabase/migrations/20260714070000_profile_schema.sql`, seeded via `supabase/seed.sql`.
 Backs the `/profile` route (`lib/profile/profile-queries.ts`). Extended by
 `supabase/migrations/20260716090000_profile_language.sql` (adds `profiles.language`, see
-Internationalization above).
+Internationalization above) and `supabase/migrations/20260716100000_write_kudos.sql` (adds
+`kudos.is_anonymous`/`anonymous_name`/`image_urls`, a sender-scoped insert policy, and the public
+`kudos-images` Storage bucket used by the write-kudos modal's upload flow). Table-level
+privileges — a separate layer from RLS — come from
+`supabase/migrations/20260722070000_grant_table_privileges.sql`; see Kudos Feed below for why
+that migration exists.
 
 | Table | Purpose |
 |---|---|
 | `profiles` | One row per `auth.users` id — display name, hero code/badge, avatar, boxes opened/unopened, `language` (`'vi'` \| `'en'`, default `'vi'`) |
-| `kudos` | Sender → receiver messages with hashtags, attachment count, `hearts_count`, `is_spam` flag |
+| `kudos` | Sender → receiver messages with hashtags, attachment count, `hearts_count`, `is_spam` flag, `is_anonymous`/`anonymous_name` (anonymous send), `image_urls` (uploaded to the `kudos-images` Storage bucket) |
 | `secret_box_icons` | Catalog of unlockable icons (name, image, sort order) |
 | `user_icon_unlocks` | Join table: which icons a user has unlocked, and when |
 
 RLS is enabled on all four tables with permissive `SELECT` policies for `anon`/`authenticated`
-(local-dev only — no other insert/update/delete policies exist yet, **except** the owner-scoped
-`UPDATE` policy on `profiles` added alongside the `language` column (`using (auth.uid() = id)
-with check (auth.uid() = id)`) so a logged-in user can persist their own language preference; **do
-not ship this RLS setup to production as-is**). `lib/profile/profile-queries.ts` returns safe
-empty results on query error rather than throwing.
+(local-dev only). Two narrower write policies sit on top: the owner-scoped `UPDATE` policy on
+`profiles` (`using (auth.uid() = id) with check (auth.uid() = id)`, added alongside the
+`language` column) so a logged-in user can persist their own language preference, and the
+sender-scoped `INSERT` policy on `kudos` (`with check (sender_id = auth.uid())`) from the
+write-kudos migration. **Do not ship this RLS setup to production as-is.** RLS is necessary but
+not sufficient for access — table-level `GRANT`s are a separate Postgres layer (see Kudos Feed
+below); a table with RLS policies but no `GRANT` still rejects every query with `42501`.
+`lib/profile/profile-queries.ts` returns safe empty results on query error rather than throwing.
 
 Defined separately in `supabase/migrations/20260714080000_event_settings.sql`. Backs the
 countdown nav-lock and `/count-down-prelaunch` (`lib/countdown/event-settings-queries.ts`).
@@ -136,6 +154,45 @@ countdown nav-lock and `/count-down-prelaunch` (`lib/countdown/event-settings-qu
 
 RLS: permissive public `SELECT` (`anon`/`authenticated`), no write policies — same local-dev-only
 convention as the profile tables above; **do not ship as-is to production**.
+
+## Kudos Feed (ALL KUDOS on `/kudos-live-board`)
+
+The ALL KUDOS feed renders real `kudos` rows (previously mock data):
+
+- `lib/kudos/kudos-feed-queries.ts` (`getAllKudos`) — every `kudos` row, newest first, joined
+  with sender + receiver `profiles` (display name, hero code/badge, avatar). Returns `[]` on any
+  query error so the page still renders its empty state instead of crashing if the local
+  Supabase stack is down or a permissions regression reintroduces the `42501` error below.
+- `lib/kudos/kudo-feed-mapper.ts` (`toKudoFeedCards`) — pure, server-only mapper to
+  `KudoPostData` (the feed card's prop shape). For `is_anonymous` rows, the joined `sender`
+  profile is simply never read — real name/hero/avatar never reach the mapped card — and
+  `anonymousName` (falling back to "Ẩn danh") is shown instead. `message` is also rendered via
+  `sanitizeMessageHtml` (`lib/kudos/sanitize-message-html.ts`) as `messageHtml`; the write-kudos
+  modal stores Tiptap output as sanitized HTML, and `kudo-post-card.tsx` renders it through
+  `dangerouslySetInnerHTML` (pre-sanitized upstream), falling back to plain `message` text for
+  any row without `messageHtml`.
+- Display formatting (`formatCount`, `formatKudoTime`) was extracted to
+  `lib/format/kudo-display-format.ts` out of `lib/profile/profile-view-mappers.ts`, so `/profile`
+  and `/kudos-live-board` format counts/timestamps identically.
+- Still mock: the highlight banner, spotlight panel, and the `StatsOverviewPanel` /
+  `GiftReceiversPanel` sidebar (`kudo-posts-data.ts` mock arrays) — only the main feed column
+  reads from the database.
+
+**Local-dev permissions gotcha:** an RLS policy is not enough on its own — Postgres also
+requires an explicit `GRANT` on the table for the querying role, and the original schema
+migrations never issued one. Every feed read failed with `42501` until
+`supabase/migrations/20260722070000_grant_table_privileges.sql` added
+`grant select on all tables in schema public to anon, authenticated`,
+`grant insert on public.kudos to authenticated`, and full grants (+ default privileges so future
+migrations inherit them) to `service_role`. Re-run `supabase db reset` after pulling this
+migration.
+
+**Known gap:** anonymization currently happens only at the app's read layer — the real
+`sender_id` on an anonymous row is still fetchable via a direct PostgREST call using the anon key
+(e.g. `select=sender_id` on `kudos`), since RLS/GRANTs allow reading the column, only
+`kudo-feed-mapper.ts` chooses not to surface it. Recommended production fix: a
+`security_invoker` view (or column-level RLS) that nulls `sender_id` for anonymous rows at the
+database layer, not just in application code.
 
 ## UI Source
 
@@ -189,10 +246,14 @@ exist; the same path serves either language based on the resolved locale).
 ## Known Gaps (not yet addressed by this feature)
 
 - No sign-out action exists yet.
-- `supabase/migrations/*.sql` RLS policies are permissive-read-only for local dev; write policies
-  and a production-safe RLS model are not defined yet. This includes `event_settings`.
-- Local Supabase stack (`supabase start` / `db reset`) requires Docker; not verified against a
-  running instance in this pass — `/profile` was only exercised against its empty state.
+- `supabase/migrations/*.sql` RLS policies are permissive-read for local dev, with two narrow
+  write exceptions (`profiles` self-`UPDATE`, `kudos` sender-scoped `INSERT` — see Database
+  Schema above); a production-safe RLS model (and the table `GRANT`s layered on top, see Kudos
+  Feed above) is not defined yet. This includes `event_settings`, which still has no write
+  policy at all.
+- Anonymous kudos are anonymized only at the app's read layer, not the database layer — see
+  "Known gap" under Kudos Feed above (direct PostgREST access with the anon key can still read
+  `sender_id` on an anonymous row).
 - The nav-lock's `launch_at` cache (`lib/countdown/launch-at-cache.ts`) is a module-level
   in-process cache — safe for a single server instance (local/dev); a multi-instance production
   deploy would need a shared cache or a shorter TTL to keep instances in sync.
