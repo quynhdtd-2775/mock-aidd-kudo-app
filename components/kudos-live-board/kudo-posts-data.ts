@@ -30,4 +30,13 @@ export interface KudoPostData {
    * kudo-post-card.tsx renders these instead of the `attachmentCount`
    * placeholder loop. */
   imageUrls?: string[];
+  /** Raw numeric hearts count — real feed rows only. When present (together
+   * with heartsLiked/isOwnKudo), kudo-post-card.tsx renders the interactive
+   * HeartButton instead of the static hearts span. */
+  heartsValue?: number;
+  /** Whether the current viewer already hearted this kudo. */
+  heartsLiked?: boolean;
+  /** Whether the current viewer is this kudo's sender — heart button is
+   * disabled (self-like is rejected server-side too). */
+  isOwnKudo?: boolean;
 }

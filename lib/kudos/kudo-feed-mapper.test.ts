@@ -30,6 +30,9 @@ function baseItem(overrides: Partial<KudoFeedItem> = {}): KudoFeedItem {
     createdAt: "2025-10-30T10:00:00Z",
     sender: SENDER,
     receiver: RECEIVER,
+    senderId: "sender-1",
+    likedByMe: false,
+    isOwnKudo: false,
     ...overrides,
   };
 }
@@ -50,6 +53,21 @@ describe("toKudoFeedCards", () => {
     expect(card.time).toBe("17:00 - 10/30/2025");
     expect(card.heartsCount).toBe("1.000");
     expect(card.messageHtml).toBe("<p>Great job!</p>");
+  });
+
+  it("passes through heartsValue (raw number), heartsLiked, and isOwnKudo", () => {
+    const [liked] = toKudoFeedCards([
+      baseItem({ heartsCount: 42, likedByMe: true, isOwnKudo: false }),
+    ]);
+    expect(liked.heartsValue).toBe(42);
+    expect(liked.heartsLiked).toBe(true);
+    expect(liked.isOwnKudo).toBe(false);
+
+    const [own] = toKudoFeedCards([
+      baseItem({ likedByMe: false, isOwnKudo: true }),
+    ]);
+    expect(own.heartsLiked).toBe(false);
+    expect(own.isOwnKudo).toBe(true);
   });
 
   it("anonymizes a row with no custom name → 'Ẩn danh', empty hero code, 'new' badge, no sender leak", () => {

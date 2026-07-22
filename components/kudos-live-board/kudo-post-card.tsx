@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { getTranslations } from "next-intl/server";
+import { HeartButton } from "./heart-button";
 import { KudoSenderInfo } from "./kudo-sender-info";
 import type { KudoPostData } from "./kudo-posts-data";
 
@@ -132,21 +133,30 @@ export async function KudoPostCard({ post }: { post: KudoPostData }) {
       {/* mm:I3127:21871;256:5194 — C.4_Button */}
       <div className="flex w-full flex-wrap items-center justify-between gap-4">
         {/* mm:I3127:21871;256:5175 — C.4.1_Hearts */}
-        <div className="flex items-center gap-1">
-          <span
-            className="text-2xl font-bold leading-8 text-[#00101A]"
-            style={{ fontFamily: "var(--font-montserrat)" }}
-          >
-            {post.heartsCount}
-          </span>
-          <Image
-            src="/kudos-live-board/icon-heart.svg"
-            alt=""
-            width={32}
-            height={32}
-            aria-hidden="true"
+        {post.heartsValue !== undefined ? (
+          <HeartButton
+            kudoId={post.id}
+            initialLiked={!!post.heartsLiked}
+            initialCount={post.heartsValue}
+            disabled={!!post.isOwnKudo}
           />
-        </div>
+        ) : (
+          <div className="flex items-center gap-1">
+            <span
+              className="text-2xl font-bold leading-8 text-[#00101A]"
+              style={{ fontFamily: "var(--font-montserrat)" }}
+            >
+              {post.heartsCount}
+            </span>
+            <Image
+              src="/kudos-live-board/icon-heart.svg"
+              alt=""
+              width={32}
+              height={32}
+              aria-hidden="true"
+            />
+          </div>
+        )}
 
         {/* mm:I3127:21871;256:5216 — C.4.2_Copy link button */}
         <button

@@ -74,4 +74,18 @@ export interface KudoFeedItem {
   createdAt: string;
   sender: KudoFeedProfile | null;
   receiver: KudoFeedProfile | null;
+  /** kudos.sender_id — used to derive isOwnKudo (self-like guard). */
+  senderId: string;
+  /** Whether the current viewer has already hearted this kudo. */
+  likedByMe: boolean;
+  /** Whether the current viewer is the kudo's sender (heart button disabled). */
+  isOwnKudo: boolean;
 }
+
+// --- Hearts/like toggle (app/kudos-live-board/actions.ts toggleKudoHeart) ---
+
+export type HeartErrorCode = "self_like" | "kudo_not_found" | "toggle_failed";
+
+export type HeartToggleResult =
+  | { ok: true; liked: boolean; heartsCount: number }
+  | { ok: false; error: HeartErrorCode };

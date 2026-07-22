@@ -160,7 +160,10 @@
     "heroBadgeNew": "New Hero",
     "heroBadgeRising": "Rising Hero",
     "heroBadgeLegend": "Legend Hero",
-    "heroBadgeSuper": "Super Hero"
+    "heroBadgeSuper": "Super Hero",
+    "likeKudo": "Thích",
+    "unlikeKudo": "Bỏ thích",
+    "ownKudoHeartDisabled": "Bạn không thể thả tim cho kudo của chính mình"
   },
   "Profile": {
     "metaTitle": "Profile bản thân | Sun* Annual Awards 2025",

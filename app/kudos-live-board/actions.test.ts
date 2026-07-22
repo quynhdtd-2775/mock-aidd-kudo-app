@@ -39,7 +39,12 @@ vi.mock("next/navigation", () => ({
 }));
 
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { createKudo, getHashtagSuggestionsAction, searchProfilesAction } from "./actions";
+import {
+  createKudo,
+  getHashtagSuggestionsAction,
+  searchProfilesAction,
+  toggleKudoHeart,
+} from "./actions";
 import type { CreateKudoInput } from "@/lib/kudos/kudos-types";
 
 const SENDER_ID = "sender-1";
@@ -386,6 +391,250 @@ describe("searchProfilesAction", () => {
 
     expect(searchProfilesMock).toHaveBeenCalledWith("john");
     expect(result).toEqual([{ id: "p1", displayName: "John", avatarUrl: null }]);
+  });
+});
+
+const KUDO_ID = "kudo-1";
+const OTHER_SENDER_ID = "other-sender-1";
+
+/**
+ * Builds a fake Supabase client for toggleKudoHeart: dispatches
+ * `.from("kudos")` on the select column ("sender_id" for the ownership
+ * check vs "hearts_count" for the post-toggle re-read) and
+ * `.from("kudo_hearts")` for the existing-like lookup + insert/delete.
+ * Defaults: kudo found (sender = OTHER_SENDER_ID), no existing like (like
+ * path), insert/delete succeed, refreshed hearts_count = 1001.
+ */
+function buildHeartToggleClient(
+  opts: {
+    kudoFound?: boolean;
+    kudoSenderId?: string;
+    kudoLookupError?: unknown;
+    existingHeart?: { kudo_id: string } | null;
+    existingLookupError?: unknown;
+    insertError?: unknown;
+    deleteError?: unknown;
+    refreshFound?: boolean;
+    heartsCountAfter?: number;
+    refreshError?: unknown;
+  } = {},
+) {
+  const {
+    kudoFound = true,
+    kudoSenderId = OTHER_SENDER_ID,
+    kudoLookupError = null,
+    existingHeart = null,
+    existingLookupError = null,
+    insertError = null,
+    deleteError = null,
+    refreshFound = true,
+    heartsCountAfter = 1001,
+    refreshError = null,
+  } = opts;
+
+  const senderMaybeSingle = vi.fn().mockResolvedValue({
+    data: kudoFound ? { sender_id: kudoSenderId } : null,
+    error: kudoLookupError,
+  });
+  const senderEq = vi.fn().mockReturnValue({ maybeSingle: senderMaybeSingle });
+
+  const countMaybeSingle = vi.fn().mockResolvedValue({
+    data: refreshFound ? { hearts_count: heartsCountAfter } : null,
+    error: refreshError,
+  });
+  const countEq = vi.fn().mockReturnValue({ maybeSingle: countMaybeSingle });
+
+  const kudosSelect = vi.fn((cols: string) => {
+    if (cols === "sender_id") return { eq: senderEq };
+    if (cols === "hearts_count") return { eq: countEq };
+    throw new Error(`unexpected kudos select: ${cols}`);
+  });
+
+  const existingMaybeSingle = vi.fn().mockResolvedValue({
+    data: existingHeart,
+    error: existingLookupError,
+  });
+  const existingEq2 = vi.fn().mockReturnValue({ maybeSingle: existingMaybeSingle });
+  const existingEq1 = vi.fn().mockReturnValue({ eq: existingEq2 });
+  const heartsSelect = vi.fn().mockReturnValue({ eq: existingEq1 });
+
+  const heartsInsert = vi.fn().mockResolvedValue({ error: insertError });
+
+  const deleteEq2 = vi.fn().mockResolvedValue({ error: deleteError });
+  const deleteEq1 = vi.fn().mockReturnValue({ eq: deleteEq2 });
+  const heartsDelete = vi.fn().mockReturnValue({ eq: deleteEq1 });
+
+  const from = vi.fn((table: string) => {
+    if (table === "kudos") return { select: kudosSelect };
+    if (table === "kudo_hearts") {
+      return { select: heartsSelect, insert: heartsInsert, delete: heartsDelete };
+    }
+    throw new Error(`unexpected table: ${table}`);
+  });
+
+  const client = { from };
+  return { client, from, kudosSelect, heartsInsert, heartsDelete, deleteEq1, existingEq1, heartsSelect };
+}
+
+describe("toggleKudoHeart", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    isMockAuthEnabledMock.mockReturnValue(false);
+  });
+
+  it("redirects to /login when there is no current user", async () => {
+    resolveCurrentUserIdMock.mockResolvedValue(null);
+
+    await expect(toggleKudoHeart(KUDO_ID)).rejects.toThrow("NEXT_REDIRECT");
+    expect(redirectMock).toHaveBeenCalledWith("/login");
+    expect(createClientMock).not.toHaveBeenCalled();
+  });
+
+  it("returns kudo_not_found when the kudo lookup misses", async () => {
+    resolveCurrentUserIdMock.mockResolvedValue(SENDER_ID);
+    const { client } = buildHeartToggleClient({ kudoFound: false });
+    createClientMock.mockResolvedValue(client);
+
+    const result = await toggleKudoHeart(KUDO_ID);
+
+    expect(result).toEqual({ ok: false, error: "kudo_not_found" });
+  });
+
+  it("returns kudo_not_found when the kudo lookup errors", async () => {
+    resolveCurrentUserIdMock.mockResolvedValue(SENDER_ID);
+    const { client } = buildHeartToggleClient({ kudoLookupError: new Error("db down") });
+    createClientMock.mockResolvedValue(client);
+
+    const result = await toggleKudoHeart(KUDO_ID);
+
+    expect(result).toEqual({ ok: false, error: "kudo_not_found" });
+  });
+
+  it("returns self_like when the current user is the kudo's sender", async () => {
+    resolveCurrentUserIdMock.mockResolvedValue(SENDER_ID);
+    const { client } = buildHeartToggleClient({ kudoSenderId: SENDER_ID });
+    createClientMock.mockResolvedValue(client);
+
+    const result = await toggleKudoHeart(KUDO_ID);
+
+    expect(result).toEqual({ ok: false, error: "self_like" });
+  });
+
+  it("inserts a like (hearts_value 1) and returns liked:true when no existing row", async () => {
+    resolveCurrentUserIdMock.mockResolvedValue(SENDER_ID);
+    const { client, heartsInsert } = buildHeartToggleClient({
+      existingHeart: null,
+      heartsCountAfter: 1001,
+    });
+    createClientMock.mockResolvedValue(client);
+
+    const result = await toggleKudoHeart(KUDO_ID);
+
+    expect(heartsInsert).toHaveBeenCalledWith({
+      kudo_id: KUDO_ID,
+      user_id: SENDER_ID,
+      hearts_value: 1,
+    });
+    expect(result).toEqual({ ok: true, liked: true, heartsCount: 1001 });
+  });
+
+  it("deletes the like and returns liked:false when a row already exists", async () => {
+    resolveCurrentUserIdMock.mockResolvedValue(SENDER_ID);
+    const { client, heartsDelete, deleteEq1 } = buildHeartToggleClient({
+      existingHeart: { kudo_id: KUDO_ID },
+      heartsCountAfter: 999,
+    });
+    createClientMock.mockResolvedValue(client);
+
+    const result = await toggleKudoHeart(KUDO_ID);
+
+    expect(heartsDelete).toHaveBeenCalledTimes(1);
+    expect(deleteEq1).toHaveBeenCalledWith("kudo_id", KUDO_ID);
+    expect(result).toEqual({ ok: true, liked: false, heartsCount: 999 });
+  });
+
+  it("returns toggle_failed when the insert fails", async () => {
+    resolveCurrentUserIdMock.mockResolvedValue(SENDER_ID);
+    const { client } = buildHeartToggleClient({ insertError: new Error("insert failed") });
+    createClientMock.mockResolvedValue(client);
+    const consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+
+    const result = await toggleKudoHeart(KUDO_ID);
+
+    expect(result).toEqual({ ok: false, error: "toggle_failed" });
+    consoleErrorSpy.mockRestore();
+  });
+
+  it("treats a 23505 duplicate-key insert error as already-liked (MAJOR-2 race fix)", async () => {
+    // Regression guard: two concurrent toggles for the same user can both
+    // read existing=null, then race the insert. The loser gets a Postgres
+    // unique-violation (23505) on the (kudo_id, user_id) PK, which must be
+    // treated as success (liked:true) rather than reverting the optimistic
+    // UI to "not liked" while the DB actually holds the like row.
+    resolveCurrentUserIdMock.mockResolvedValue(SENDER_ID);
+    const { client } = buildHeartToggleClient({
+      insertError: { code: "23505", message: "duplicate key value violates unique constraint" },
+      heartsCountAfter: 1001,
+    });
+    createClientMock.mockResolvedValue(client);
+
+    const result = await toggleKudoHeart(KUDO_ID);
+
+    expect(result).toEqual({ ok: true, liked: true, heartsCount: 1001 });
+  });
+
+  it("returns toggle_failed (not liked:true) for a non-23505 insert error", async () => {
+    resolveCurrentUserIdMock.mockResolvedValue(SENDER_ID);
+    const { client } = buildHeartToggleClient({
+      insertError: { code: "23503", message: "foreign key violation" },
+    });
+    createClientMock.mockResolvedValue(client);
+    const consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+
+    const result = await toggleKudoHeart(KUDO_ID);
+
+    expect(result).toEqual({ ok: false, error: "toggle_failed" });
+    consoleErrorSpy.mockRestore();
+  });
+
+  it("returns toggle_failed when the delete fails", async () => {
+    resolveCurrentUserIdMock.mockResolvedValue(SENDER_ID);
+    const { client } = buildHeartToggleClient({
+      existingHeart: { kudo_id: KUDO_ID },
+      deleteError: new Error("delete failed"),
+    });
+    createClientMock.mockResolvedValue(client);
+    const consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+
+    const result = await toggleKudoHeart(KUDO_ID);
+
+    expect(result).toEqual({ ok: false, error: "toggle_failed" });
+    consoleErrorSpy.mockRestore();
+  });
+
+  it("returns toggle_failed when the post-toggle hearts_count re-read misses", async () => {
+    resolveCurrentUserIdMock.mockResolvedValue(SENDER_ID);
+    const { client } = buildHeartToggleClient({ refreshFound: false });
+    createClientMock.mockResolvedValue(client);
+    const consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+
+    const result = await toggleKudoHeart(KUDO_ID);
+
+    expect(result).toEqual({ ok: false, error: "toggle_failed" });
+    consoleErrorSpy.mockRestore();
+  });
+
+  it("uses the service-role client when mock auth is enabled", async () => {
+    isMockAuthEnabledMock.mockReturnValue(true);
+    resolveCurrentUserIdMock.mockResolvedValue(SENDER_ID);
+    const { client } = buildHeartToggleClient();
+    createServiceRoleClientMock.mockReturnValue(client);
+
+    const result = await toggleKudoHeart(KUDO_ID);
+
+    expect(result.ok).toBe(true);
+    expect(createServiceRoleClientMock).toHaveBeenCalledTimes(1);
+    expect(createClientMock).not.toHaveBeenCalled();
   });
 });
 

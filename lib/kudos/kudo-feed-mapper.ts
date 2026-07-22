@@ -55,6 +55,9 @@ export function toKudoFeedCards(items: KudoFeedItem[]): KudoPostData[] {
       imageUrls: item.imageUrls,
       hashtags: formatHashtagsDisplay(item.hashtags),
       heartsCount: formatCount(item.heartsCount),
+      heartsValue: item.heartsCount,
+      heartsLiked: item.likedByMe,
+      isOwnKudo: item.isOwnKudo,
     };
   });
 }

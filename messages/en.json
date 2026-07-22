@@ -160,7 +160,10 @@
     "heroBadgeNew": "New Hero",
     "heroBadgeRising": "Rising Hero",
     "heroBadgeLegend": "Legend Hero",
-    "heroBadgeSuper": "Super Hero"
+    "heroBadgeSuper": "Super Hero",
+    "likeKudo": "Like",
+    "unlikeKudo": "Unlike",
+    "ownKudoHeartDisabled": "You can't heart your own kudo"
   },
   "Profile": {
     "metaTitle": "My Profile | Sun* Annual Awards 2025",
