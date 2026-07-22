@@ -145,6 +145,7 @@
     "prevPageAriaLabel": "Previous page",
     "nextPageAriaLabel": "Next page",
     "allKudosHeading": "ALL KUDOS",
+    "allKudosEmpty": "No kudos yet.",
     "giftReceiversTitle": "10 LATEST SUNNERS\nWHO RECEIVED GIFTS",
     "statKudosReceived": "Kudos you received:",
     "statKudosSent": "Kudos you sent:",

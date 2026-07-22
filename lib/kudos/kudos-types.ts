@@ -1,3 +1,5 @@
+import type { HeroBadgeVariant } from "@/components/kudos-live-board/kudo-hero-badge";
+
 // Shapes shared by lib/kudos/** and app/kudos-live-board/actions.ts.
 //
 // Server actions return typed error CODES here, not translated strings —
@@ -47,3 +49,29 @@ export interface CreateKudoFieldErrors {
 export type CreateKudoResult =
   | { ok: true }
   | { ok: false; error: CreateKudoErrorCode; fieldErrors?: CreateKudoFieldErrors };
+
+// --- ALL KUDOS feed (lib/kudos/kudos-feed-queries.ts + kudo-feed-mapper.ts) ---
+
+/** Sender/receiver profile fields joined onto a kudos row for the feed. */
+export interface KudoFeedProfile {
+  displayName: string;
+  heroCode: string;
+  heroBadge: HeroBadgeVariant;
+  avatarUrl: string | null;
+}
+
+/** Raw DB shape returned by getAllKudos(), before pure mapping to KudoPostData. */
+export interface KudoFeedItem {
+  id: string;
+  hashtagTitle: string;
+  message: string;
+  attachmentCount: number;
+  hashtags: string;
+  heartsCount: number;
+  imageUrls: string[];
+  isAnonymous: boolean;
+  anonymousName: string | null;
+  createdAt: string;
+  sender: KudoFeedProfile | null;
+  receiver: KudoFeedProfile | null;
+}
