@@ -1,0 +1,40 @@
+{
+  "task": "Complete the Homepage SAA page (/home-page-saa) to MoMorph spec (screenId i87tDx10uM): wire countdown to event_settings, build minimal notifications system, add profiles.role + admin menu, wire widget button to WriteKudoModal, award-card hash navigation + hash-scroll-on-load on awards page, spec event-info copy, grid/clamp visual fixes.",
+  "mode": "interactive",
+  "acceptanceCriteria": [
+    "Countdown tiles driven by event_settings.launch_at via getCachedLaunchAt + useCountdown; 2-digit 0-padded; updates in real time; at/after zero shows 00 00 00, hides 'Coming soon', and does NOT redirect-loop on the homepage (ID-12, ID-39..43)",
+    "notifications table (user_id, title, body, read_at) + RLS + seed rows; bell opens dropdown panel; red badge visible iff unread notifications exist (ID-11, ID-27..29)",
+    "profiles.role column (default 'user', one seeded admin); account menu shows Profile + Sign out for all users, plus Admin Dashboard (placeholder route) only for role=admin (ID-5/6, ID-36..38)",
+    "Floating widget button opens WriteKudoModal (clarified ID-54)",
+    "Award cards: image/title/'Chi tiết' navigate to /home-awards-page#<CARD_ANCHORS slug>; awards page scrolls to the section on load when hash present (ID-47..52, ID-62 tolerates missing hash)",
+    "Event info shows spec values: 18h30 / Nhà hát nghệ thuật quân đội / Tường thuật trực tiếp tại Group Facebook Sun* Family (ID-14)",
+    "Awards grid 2-col mobile+tablet, 3-col desktop; card description clamped to 2 lines with ellipsis (ID-15/16)",
+    "Existing i18n VN/EN switch, auth gating, logout unaffected (ID-24..26, ID-36); vitest suite, lint, and next build pass"
+  ],
+  "touchpoints": [
+    "app/home-page-saa/page.tsx (existing canonical homepage)",
+    "components/home/* (site-header, user-menu, hero-countdown, hero-widget-button, award-card, awards-section)",
+    "messages/vi.json + messages/en.json (Hero namespace; key-parity test)",
+    "lib/countdown/{launch-at-cache,use-countdown,event-settings-queries}.ts",
+    "components/kudos/write-kudo/write-kudo-modal.tsx + components/kudos-live-board/write-kudo-launcher.tsx (reuse pattern)",
+    "components/home-awards-page/{awards-section,scroll-to-award-section}.ts(x) — CARD_ANCHORS slugs, hash-scroll-on-load",
+    "supabase/migrations/ + supabase/seed.sql (notifications table, profiles.role)",
+    "lib/auth/auth-service.ts getCurrentUser; app/auth/actions.ts logout"
+  ],
+  "blastRadius": [
+    "components/home/* (shared only with /home-page-saa route)",
+    "messages/*.json (all pages read translations; parity test guards)",
+    "supabase schema/seed (db reset flow; RLS must not break existing tables)",
+    "components/home-awards-page/* (hash-scroll addition; existing menu-driven scroll must keep working)",
+    "lib/countdown/use-countdown.ts (redirect-at-zero behavior consumed by /count-down-prelaunch — must not regress)",
+    "new app/admin placeholder route (middleware auth gating applies)"
+  ],
+  "contracts": [
+    "useCountdown(launchAt: Date | null): CountdownParts — ticks 1s, currently router.replace('/') at zero (prelaunch behavior; homepage needs non-redirecting variant)",
+    "getCachedLaunchAt(): Promise<Date | null> — 60s TTL cache, never throws",
+    "WriteKudoModal({ isOpen, onClose }) — controlled dialog",
+    "CARD_ANCHORS slugs: top-talent, top-project, top-project-leader, best-manager, signature-2025-creator, mvp",
+    "logout() server action; getCurrentUser(): Promise<AuthUser|null>",
+    "setLocale(locale) server action; SUPPORTED_LOCALES ['vi','en']"
+  ]
+}

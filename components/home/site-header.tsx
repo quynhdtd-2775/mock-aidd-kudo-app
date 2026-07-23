@@ -3,8 +3,12 @@ import Link from "next/link";
 import { Montserrat } from "next/font/google";
 import { getLocale, getTranslations } from "next-intl/server";
 import { getCurrentUser } from "@/lib/auth/auth-service";
+import { resolveCurrentUserId } from "@/lib/profile/current-user";
 import { DEFAULT_LOCALE, isLocale } from "@/lib/i18n/locale-config";
+import { getNotifications } from "@/lib/notifications/notifications-queries";
+import { getCurrentUserRole } from "@/lib/profile/profile-role-query";
 import { LanguageSwitcher } from "./language-switcher";
+import { NotificationsBell } from "./notifications-bell";
 import { UserMenu } from "./user-menu";
 
 /**
@@ -22,6 +26,9 @@ export async function SiteHeader() {
   const user = await getCurrentUser();
   const t = await getTranslations("Header");
   const locale = await getLocale();
+  const userId = await resolveCurrentUserId();
+  const notifications = userId ? await getNotifications(userId) : [];
+  const role = userId ? await getCurrentUserRole(userId) : "user";
 
   const NAV_ITEMS = [
     // mm:I2167:9091;186:1579 — selected state
@@ -93,39 +100,13 @@ export async function SiteHeader() {
       {/* mm:I2167:9091;186:1601 */}
       <div className="flex items-center gap-[16px]">
         {/* mm:I2167:9091;186:2101 — notification */}
-        <div className="relative h-10 w-10">
-          {/* mm:I2167:9091;186:2101;186:2020 */}
-          <div
-            tabIndex={0}
-            className="flex h-10 w-10 cursor-pointer items-center justify-center gap-2 rounded-[4px] bg-transparent p-[10px] transition-colors duration-200 hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FFEA9E] focus-visible:ring-offset-1"
-          >
-            {/* mm:I2167:9091;186:2101;186:2020;186:1420 — /home/Noti_True.svg inlined (currentColor) */}
-            <svg
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-6 w-6 shrink-0 text-white"
-            >
-              <path
-                d="M21 19V20H3V19L5 17V11C5 7.9 7.03 5.17 10 4.29C10 4.19 10 4.1 10 4C10 3.46957 10.2107 2.96086 10.5858 2.58579C10.9609 2.21071 11.4696 2 12 2C12.5304 2 13.0391 2.21071 13.4142 2.58579C13.7893 2.96086 14 3.46957 14 4C14 4.1 14 4.19 14 4.29C16.97 5.17 19 7.9 19 11V17L21 19ZM14 21C14 21.5304 13.7893 22.0391 13.4142 22.4142C13.0391 22.7893 12.5304 23 12 23C11.4696 23 10.9609 22.7893 10.5858 22.4142C10.2107 22.0391 10 21.5304 10 21"
-                fill="currentColor"
-              />
-            </svg>
-          </div>
-          {/* mm:I2167:9091;186:2101;186:2089 — badge dot */}
-          <div className="absolute right-[9px] top-[9px] h-2 w-2 rounded-full">
-            {/* mm:I2167:9091;186:2101;186:2090 */}
-            <div className="h-2 w-2 rounded-full bg-[#D4271D]" />
-          </div>
-        </div>
+        <NotificationsBell items={notifications} />
 
         {/* mm:I2167:9091;186:1696 — language selector */}
         <LanguageSwitcher currentLocale={isLocale(locale) ? locale : DEFAULT_LOCALE} />
 
         {/* mm:I2167:9091;186:1597 — profile button with logout dropdown */}
-        <UserMenu email={user?.email ?? null} />
+        <UserMenu email={user?.email ?? null} isAdmin={role === "admin"} />
       </div>
     </header>
   );

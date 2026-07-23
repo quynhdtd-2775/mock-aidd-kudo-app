@@ -18,7 +18,20 @@
   },
   "UserMenu": {
     "accountAriaLabel": "Account",
+    "profile": "Profile",
+    "adminDashboard": "Admin Dashboard",
     "logout": "Log out"
+  },
+  "Notifications": {
+    "bellAriaLabel": "Notifications",
+    "panelTitle": "Notifications",
+    "empty": "No notifications yet."
+  },
+  "Admin": {
+    "metaTitle": "Admin Dashboard | Sun* Annual Awards 2025",
+    "metaDescription": "Admin-only dashboard placeholder.",
+    "heading": "Admin Dashboard",
+    "placeholder": "This dashboard is coming soon."
   },
   "Hero": {
     "comingSoon": "Coming soon",
@@ -26,10 +39,10 @@
     "countdownHours": "HOURS",
     "countdownMinutes": "MINUTES",
     "eventTimeLabel": "Time: ",
-    "eventTimeValue": "26/12/2025",
+    "eventTimeValue": "6:30 PM",
     "eventLocationLabel": "Location:",
-    "eventLocationValue": "Âu Cơ Art Center",
-    "livestreamNote": "Streamed live via Livestream",
+    "eventLocationValue": "Army Art Theatre",
+    "livestreamNote": "Broadcast live on the Sun* Family Facebook Group",
     "ctaAboutAwards": "ABOUT AWARDS",
     "ctaAboutKudos": "ABOUT KUDOS",
     "widgetButtonAriaLabel": "Write Kudos",

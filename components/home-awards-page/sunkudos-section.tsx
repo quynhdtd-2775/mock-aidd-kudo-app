@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 
 function IconUp(props: React.SVGProps<SVGSVGElement>) {
@@ -88,9 +89,9 @@ export async function SunKudosSection() {
 
           {/* mm:I3390:10349;313:8424 */}
           <div className="flex w-full max-w-[470px] flex-col items-start gap-6">
-            {/* mm:I3390:10349;313:8426 */}
-            <button
-              type="button"
+            {/* mm:I3390:10349;313:8426 — spec D2.1: "Chi tiết" navigates to the Sun* Kudos page */}
+            <Link
+              href="/kudos-live-board"
               className="flex items-center gap-2 rounded transition-colors duration-200 hover:bg-[#FFF3C4] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FFEA9E] focus-visible:ring-offset-2 active:translate-y-px"
               style={{
                 padding: 16,
@@ -115,7 +116,7 @@ export async function SunKudosSection() {
                 </span>
               </span>
               <IconUp className="h-6 w-6" />
-            </button>
+            </Link>
           </div>
         </div>
 

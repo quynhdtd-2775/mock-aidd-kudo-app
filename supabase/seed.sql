@@ -43,7 +43,17 @@ values
   ('00000000-0000-4000-8000-000000000002', 'Huỳnh Dương Xuân Nhật', 'CEVC10',
    '/profile/avatar-sample-2.png', 'super', 0, 0, 'vi'),
   ('00000000-0000-4000-8000-000000000003', 'Huỳnh Dương Xuân Nhật', 'CEVC10',
-   '/profile/avatar-sample-2.png', 'legend', 0, 0, 'vi');
+   '/profile/avatar-sample-2.png', 'legend', 0, 0, 'vi')
+-- The on_auth_user_created trigger (20260722090000) already inserted bare
+-- profile rows for the auth.users above; overwrite them with the demo values.
+on conflict (id) do update set
+  display_name = excluded.display_name,
+  hero_code = excluded.hero_code,
+  avatar_url = excluded.avatar_url,
+  hero_badge = excluded.hero_badge,
+  boxes_opened = excluded.boxes_opened,
+  boxes_unopened = excluded.boxes_unopened,
+  language = excluded.language;
 
 -- 4 kudos received by the demo user, mirroring the four post cards in the
 -- design (message/hashtags/attachments/hearts copied from the Figma content).
@@ -111,3 +121,23 @@ values
   ('00000000-0000-4000-8000-000000000001', '10000000-0000-4000-8000-000000000001'),
   ('00000000-0000-4000-8000-000000000001', '10000000-0000-4000-8000-000000000002'),
   ('00000000-0000-4000-8000-000000000001', '10000000-0000-4000-8000-000000000003');
+
+-- Home page (spec A1.8, ID-5/37): promote the demo user to admin so the
+-- account menu's "Admin Dashboard" item is exercised in local dev.
+update public.profiles set role = 'admin'
+where id = '00000000-0000-4000-8000-000000000001';
+
+-- Home page notification bell (spec A1.6, ID-11/27..29): a mix of unread
+-- (read_at null) and read rows for the demo user so both badge states and
+-- the panel's read/unread styling render.
+insert into public.notifications (user_id, title, body, read_at, created_at)
+values
+  ('00000000-0000-4000-8000-000000000001', 'Bạn nhận được Kudo mới',
+   'Huỳnh Dương Xuân Nhật vừa gửi cho bạn một Kudo trong bảng tin.',
+   null, '2025-10-30T10:05:00+07:00'),
+  ('00000000-0000-4000-8000-000000000001', 'Hộp bí mật đã mở khoá',
+   'Bạn vừa mở thêm một hộp bí mật mới trong bộ sưu tập icon.',
+   null, '2025-10-30T09:00:00+07:00'),
+  ('00000000-0000-4000-8000-000000000001', 'Chào mừng bạn đến với SunKudos',
+   'Cảm ơn bạn đã tham gia SunKudos! Hãy bắt đầu gửi lời cảm ơn tới đồng nghiệp.',
+   '2025-10-29T08:00:00+07:00', '2025-10-28T08:00:00+07:00');

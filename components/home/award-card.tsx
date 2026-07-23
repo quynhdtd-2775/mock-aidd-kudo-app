@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 
 const GOLD = "rgba(255, 234, 158, 1)";
 
@@ -62,15 +63,22 @@ interface AwardCardProps {
   title: string;
   description: string;
   detailsLabel: string;
+  /** Anchor slug on /home-awards-page this card links to (see CARD_ANCHORS in awards-section.tsx). */
+  slug: string;
 }
 
-export function AwardCard({ card, title, description, detailsLabel }: AwardCardProps) {
+// Whole card (image + title + "Chi tiết") is a single link per spec C2 — nested
+// anchors aren't valid HTML, so the entire card is the clickable surface
+// rather than separate links inside it.
+export function AwardCard({ card, title, description, detailsLabel, slug }: AwardCardProps) {
   return (
-    // mm:2167:9075 — repeated award-card template (component 214:1032); per-instance nodeId: card.id
-    <div className="flex w-full max-w-[336px] flex-col items-start gap-6">
+    <Link
+      href={`/home-awards-page#${slug}`}
+      className="group flex w-full max-w-[336px] flex-col items-start gap-6 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FFEA9E] focus-visible:ring-offset-2"
+    >
       {/* mm:I2167:9075;214:1019 — Picture-Award */}
       <div
-        className="group relative flex aspect-square w-full items-center justify-center rounded-3xl transition-transform duration-300 motion-safe:hover:scale-[1.02]"
+        className="relative flex aspect-square w-full items-center justify-center rounded-3xl transition-transform duration-300 motion-safe:group-hover:scale-[1.02]"
         style={{
           boxShadow: "0 4px 4px 0 rgba(0, 0, 0, 0.25), 0 0 6px 0 #FAE287",
           mixBlendMode: "screen",
@@ -108,8 +116,9 @@ export function AwardCard({ card, title, description, detailsLabel }: AwardCardP
         >
           {title}
         </p>
-        {/* mm:I2167:9075;214:1022 — award description */}
+        {/* mm:I2167:9075;214:1022 — award description, clamped to 2 lines */}
         <p
+          className="line-clamp-2"
           style={{
             fontFamily: "var(--font-montserrat)",
             fontWeight: 400,
@@ -121,11 +130,8 @@ export function AwardCard({ card, title, description, detailsLabel }: AwardCardP
         >
           {description}
         </p>
-        {/* mm:I2167:9075;214:1023 — Button-IC "Chi tiết" */}
-        <button
-          type="button"
-          className="flex cursor-pointer items-center gap-1 py-4 transition-opacity duration-200 hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FFEA9E]"
-        >
+        {/* mm:I2167:9075;214:1023 — "Chi tiết" (part of the card-wide link, not its own anchor) */}
+        <span className="flex items-center gap-1 py-4 transition-opacity duration-200 group-hover:opacity-80">
           <span
             style={{
               fontFamily: "var(--font-montserrat)",
@@ -140,8 +146,8 @@ export function AwardCard({ card, title, description, detailsLabel }: AwardCardP
           </span>
           {/* mm:I2167:9075;214:1023;186:1441 — MM_MEDIA_Up */}
           <Image src="/home/Up.svg" alt="" width={24} height={24} />
-        </button>
+        </span>
       </div>
-    </div>
+    </Link>
   );
 }

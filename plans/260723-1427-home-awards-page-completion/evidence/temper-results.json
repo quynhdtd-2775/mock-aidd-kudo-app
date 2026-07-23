@@ -1,0 +1,32 @@
+{
+  "commands": [
+    {
+      "command": "pnpm exec tsc --noEmit",
+      "exitCode": 0,
+      "status": "pass",
+      "summary": "Type-check clean after review fixes (vi.fn vitest-4 generics in test file, dead IconTarget re-export removed)",
+      "ts": "2026-07-23T15:16:00+07:00"
+    },
+    {
+      "command": "pnpm vitest run",
+      "exitCode": 0,
+      "status": "pass",
+      "summary": "337/337 tests pass across 21 files after review fixes, incl. 7 new tests for scroll-to-award-section (ID-13 null guard, happy path, hash stripping)",
+      "ts": "2026-07-23T15:16:30+07:00"
+    },
+    {
+      "command": "pnpm exec eslint <7 changed files under components/home-awards-page/>",
+      "exitCode": 0,
+      "status": "pass",
+      "summary": "Changed files lint clean (repo-wide lint has 607 pre-existing errors, none in touched files)",
+      "ts": "2026-07-23T14:46:00+07:00"
+    },
+    {
+      "command": "playwright-mcp browser checklist vs MoMorph TCs on http://localhost:3000/home-awards-page",
+      "exitCode": 0,
+      "status": "pass",
+      "summary": "ID-0 authed render OK; ID-1 curl no-cookie 307->/login; ID-9 all 6 menu clicks scroll target to 112px (scroll-mt-28) and move active; ID-11 exactly one active after each click; ID-12 Chi tiet click lands on /kudos-live-board same tab; ID-13 removed target id -> 0 console errors, page holds position",
+      "ts": "2026-07-23T14:43:00+07:00"
+    }
+  ]
+}

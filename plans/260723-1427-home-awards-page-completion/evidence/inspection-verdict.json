@@ -1,0 +1,22 @@
+{
+  "score": 8,
+  "criticalCount": 0,
+  "decision": "SEALED",
+  "acceptanceCovered": [
+    "Menu click moves the single gold+underline active state and smooth-scrolls to the matching award card — verified in browser: all 6 clicks land target at 112px offset, exactly one aria-current at a time",
+    "Missing scroll target is a graceful no-op with no JS error — verified in browser (removed id, 0 console errors, position held) and by 7 unit tests",
+    "Chi tiet CTA navigates to /kudos-live-board in the same tab — verified in browser, lands on Sun* Kudos live board",
+    "Type-check, changed-file lint, and full unit suite pass — tsc exit 0, eslint exit 0 on 7 changed files, vitest 337/337 after review fixes"
+  ],
+  "regressionChecked": [
+    "award-card.tsx IconTarget re-export: repo-wide grep found no external consumers; dead export removed; tsc clean",
+    "Styling fidelity: award-menu-nav markup diffed byte-for-byte against git HEAD AwardMenuLink — identical classes/inline styles",
+    "Hydration: initial active state deterministic from server props (items[0].href), no SSR mismatch",
+    "Server/client boundary: icon-target.tsx has zero imports; no next-intl/server in client bundle; next build succeeds for all routes",
+    "Unauthenticated access still redirects 307 to /login (proxy untouched)"
+  ],
+  "contractStatus": "HONORED",
+  "refuted": [],
+  "unproven": [],
+  "reachableRegressions": []
+}
