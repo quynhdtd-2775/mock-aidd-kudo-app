@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { getTranslations } from "next-intl/server";
+import { HeartButton } from "./heart-button";
 import { KudoSenderInfo } from "./kudo-sender-info";
 import type { KudoPostData } from "./kudo-posts-data";
 
@@ -18,7 +19,7 @@ export async function KudoPostCard({ post }: { post: KudoPostData }) {
           name={post.senderName}
           heroCode={post.senderHeroCode}
           badgeVariant={post.senderBadge}
-          avatarSrc="/kudos-live-board/avatar-sender.png"
+          avatarSrc={post.senderAvatarSrc ?? "/kudos-live-board/avatar-sender.png"}
         />
 
         {/* mm:I3127:21871;256:5161 — C.3.2_Icon sent */}
@@ -36,7 +37,7 @@ export async function KudoPostCard({ post }: { post: KudoPostData }) {
           name={post.receiverName}
           heroCode={post.receiverHeroCode}
           badgeVariant={post.receiverBadge}
-          avatarSrc="/kudos-live-board/avatar-receiver.png"
+          avatarSrc={post.receiverAvatarSrc ?? "/kudos-live-board/avatar-receiver.png"}
         />
       </div>
 
@@ -73,30 +74,48 @@ export async function KudoPostCard({ post }: { post: KudoPostData }) {
         {/* mm:I3127:21871;662:11382 — Frame 425 (message body) */}
         <div className="w-full self-stretch rounded-xl border border-[#FFEA9E] bg-[rgba(255,234,158,0.4)] px-6 py-4">
           {/* mm:I3127:21871;256:5156 */}
-          <p
-            className="text-justify text-xl font-bold leading-8 text-[#00101A]"
-            style={{ fontFamily: "var(--font-montserrat)" }}
-          >
-            {post.message}
-          </p>
+          {post.messageHtml ? (
+            <div
+              className="text-justify text-xl font-bold leading-8 text-[#00101A] [&_p]:m-0"
+              style={{ fontFamily: "var(--font-montserrat)" }}
+              // Already sanitized (allowlist HTML) in lib/kudos/kudo-feed-mapper.ts.
+              dangerouslySetInnerHTML={{ __html: post.messageHtml }}
+            />
+          ) : (
+            <p
+              className="text-justify text-xl font-bold leading-8 text-[#00101A]"
+              style={{ fontFamily: "var(--font-montserrat)" }}
+            >
+              {post.message}
+            </p>
+          )}
         </div>
 
         {/* mm:I3127:21871;256:5176 — C.3.6_Image đính kèm */}
         <div className="flex w-full flex-wrap items-center gap-4">
-          {Array.from({ length: post.attachmentCount }).map((_, index) => (
-            <div
-              key={index}
-              className="relative h-[88px] w-[88px] shrink-0 overflow-hidden rounded-[18px] border border-[#998C5F] bg-white"
-            >
-              {/* mm:I3127:21871;256:5177;513:8436 — MM_MEDIA_Sample Image */}
-              <Image
-                src="/kudos-live-board/sample-image.png"
-                alt=""
-                fill
-                className="rounded object-cover"
-              />
-            </div>
-          ))}
+          {post.imageUrls?.length
+            ? post.imageUrls.map((src, index) => (
+                <div
+                  key={src + index}
+                  className="relative h-[88px] w-[88px] shrink-0 overflow-hidden rounded-[18px] border border-[#998C5F] bg-white"
+                >
+                  <Image src={src} alt="" fill className="rounded object-cover" />
+                </div>
+              ))
+            : Array.from({ length: post.attachmentCount }).map((_, index) => (
+                <div
+                  key={index}
+                  className="relative h-[88px] w-[88px] shrink-0 overflow-hidden rounded-[18px] border border-[#998C5F] bg-white"
+                >
+                  {/* mm:I3127:21871;256:5177;513:8436 — MM_MEDIA_Sample Image */}
+                  <Image
+                    src="/kudos-live-board/sample-image.png"
+                    alt=""
+                    fill
+                    className="rounded object-cover"
+                  />
+                </div>
+              ))}
         </div>
 
         {/* mm:I3127:21871;256:5158 — C.3.7_Hash tag */}
@@ -114,21 +133,30 @@ export async function KudoPostCard({ post }: { post: KudoPostData }) {
       {/* mm:I3127:21871;256:5194 — C.4_Button */}
       <div className="flex w-full flex-wrap items-center justify-between gap-4">
         {/* mm:I3127:21871;256:5175 — C.4.1_Hearts */}
-        <div className="flex items-center gap-1">
-          <span
-            className="text-2xl font-bold leading-8 text-[#00101A]"
-            style={{ fontFamily: "var(--font-montserrat)" }}
-          >
-            {post.heartsCount}
-          </span>
-          <Image
-            src="/kudos-live-board/icon-heart.svg"
-            alt=""
-            width={32}
-            height={32}
-            aria-hidden="true"
+        {post.heartsValue !== undefined ? (
+          <HeartButton
+            kudoId={post.id}
+            initialLiked={!!post.heartsLiked}
+            initialCount={post.heartsValue}
+            disabled={!!post.isOwnKudo}
           />
-        </div>
+        ) : (
+          <div className="flex items-center gap-1">
+            <span
+              className="text-2xl font-bold leading-8 text-[#00101A]"
+              style={{ fontFamily: "var(--font-montserrat)" }}
+            >
+              {post.heartsCount}
+            </span>
+            <Image
+              src="/kudos-live-board/icon-heart.svg"
+              alt=""
+              width={32}
+              height={32}
+              aria-hidden="true"
+            />
+          </div>
+        )}
 
         {/* mm:I3127:21871;256:5216 — C.4.2_Copy link button */}
         <button

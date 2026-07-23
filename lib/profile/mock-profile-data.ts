@@ -14,8 +14,12 @@ import type {
 import { DEMO_USER_ID } from "./current-user";
 
 export function isMockProfileDataEnabled(): boolean {
+  // ALLOW_MOCK_IN_PROD=true is the explicit opt-in for demo deployments
+  // (no hosted database); without it, mock data stays dev-only.
   return (
-    process.env.MOCK_DATA === "true" && process.env.NODE_ENV !== "production"
+    process.env.MOCK_DATA === "true" &&
+    (process.env.NODE_ENV !== "production" ||
+      process.env.ALLOW_MOCK_IN_PROD === "true")
   );
 }
 

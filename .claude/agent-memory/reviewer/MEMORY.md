@@ -1,2 +1,2 @@
-- [Kudo-app Supabase patterns](project_kudo-app-supabase-patterns.md) — mock-auth double-gate, display_name has no uniqueness, comma-joined hashtags column
+- [Kudo-app Supabase patterns](project_kudo-app-supabase-patterns.md) — mock-auth double-gate, display_name has no uniqueness, comma-joined hashtags, RLS checks identity not value, trigger clamp only on one branch, unbounded per-user "liked by me" queries
 - [Sandbox node_modules blocked](reference_sandbox-node-modules-blocked.md) — Bash/Read can't inspect node_modules; use tsc --noEmit as indirect verification

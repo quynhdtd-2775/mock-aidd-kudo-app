@@ -1,9 +1,9 @@
 import type { HeroBadgeVariant } from "./kudo-hero-badge";
 
-// mm:2940:13482 "C.2_Danh sách lời cảm ơn" — mock data extracted verbatim
-// from the four "C.3/5/6/7_KUDOpost" Figma instances (3127:21871, 3127:22053,
-// 3127:22375, 3127:22439). Text, counters and hero codes are copied exactly
-// as authored in the design; nothing here is invented.
+// mm:2940:13482 "C.2_Danh sách lời cảm ơn" — card view-model for the ALL
+// KUDOS feed. Originally shipped with verbatim Figma mock rows; those were
+// removed once live-board-all-kudos.tsx switched to real Supabase data
+// (lib/kudos/kudos-feed-queries.ts → kudo-feed-mapper.ts).
 export interface KudoPostData {
   id: string;
   senderName: string;
@@ -18,71 +18,25 @@ export interface KudoPostData {
   attachmentCount: number;
   hashtags: string;
   heartsCount: string;
+  /** Sanitized HTML for the message body — real feed rows only. When
+   * present, kudo-post-card.tsx renders this instead of the plain `message`
+   * text. Mock rows omit it and keep the plain-text branch. */
+  messageHtml?: string;
+  /** Real avatar URLs from `profiles` — real feed rows only. Falls back to
+   * the design's default avatar asset when absent. */
+  senderAvatarSrc?: string;
+  receiverAvatarSrc?: string;
+  /** Real uploaded attachment URLs — real feed rows only. When present,
+   * kudo-post-card.tsx renders these instead of the `attachmentCount`
+   * placeholder loop. */
+  imageUrls?: string[];
+  /** Raw numeric hearts count — real feed rows only. When present (together
+   * with heartsLiked/isOwnKudo), kudo-post-card.tsx renders the interactive
+   * HeartButton instead of the static hearts span. */
+  heartsValue?: number;
+  /** Whether the current viewer already hearted this kudo. */
+  heartsLiked?: boolean;
+  /** Whether the current viewer is this kudo's sender — heart button is
+   * disabled (self-like is rejected server-side too). */
+  isOwnKudo?: boolean;
 }
-
-export const KUDO_POSTS: KudoPostData[] = [
-  {
-    id: "3127:21871",
-    senderName: "Huỳnh Dương Xuân Nhật",
-    senderHeroCode: "CEVC10",
-    senderBadge: "new",
-    receiverName: "Huỳnh Dương Xuân",
-    receiverHeroCode: "CEVC10",
-    receiverBadge: "legend",
-    time: "10:00 - 10/30/2025",
-    hashtagTitle: "IDOL GIỚI TRẺ",
-    message:
-      "Cảm ơn người em bình thường nhưng phi thường :D Cảm ơn sự chăm chỉ, cần mẫn của em đã tạo động lực rất nhiều cho team, để luôn nhắc mình luôn phải nỗ lực hơn nữa trong công việc. <3 và cuộc sống...",
-    attachmentCount: 5,
-    hashtags: "#Dedicated #Inspring #Dedicated #Inspring #Dedicated  #Inspring...",
-    heartsCount: "1.000",
-  },
-  {
-    id: "3127:22053",
-    senderName: "Huỳnh Dương Xuân Nhật",
-    senderHeroCode: "CEVC10",
-    senderBadge: "rising",
-    receiverName: "Huỳnh Dương Xuân",
-    receiverHeroCode: "CEVC10",
-    receiverBadge: "legend",
-    time: "10:00 - 10/30/2025",
-    hashtagTitle: "IDOL GIỚI TRẺ",
-    message:
-      "Cảm ơn người em bình thường nhưng phi thường :D Cảm ơn sự chăm chỉ, cần mẫn của em đã tạo động lực rất nhiều cho team, để luôn nhắc mình luôn phải nỗ lực hơn nữa trong công việc. <3 và cuộc sống...",
-    attachmentCount: 5,
-    hashtags: "#Dedicated #Inspring #Dedicated #Inspring #Dedicated  #Inspring...",
-    heartsCount: "1.000",
-  },
-  {
-    id: "3127:22375",
-    senderName: "Huỳnh Dương Xuân Nhật",
-    senderHeroCode: "CEVC10",
-    senderBadge: "super",
-    receiverName: "Huỳnh Dương Xuân",
-    receiverHeroCode: "CEVC10",
-    receiverBadge: "legend",
-    time: "10:00 - 10/30/2025",
-    hashtagTitle: "IDOL GIỚI TRẺ",
-    message:
-      "Cảm ơn người em bình thường nhưng phi thường :D Cảm ơn sự chăm chỉ, cần mẫn của em đã tạo động lực rất nhiều cho team, để luôn nhắc mình luôn phải nỗ lực hơn nữa trong công việc. <3 và cuộc sống...",
-    attachmentCount: 5,
-    hashtags: "#Dedicated #Inspring #Dedicated #Inspring #Dedicated  #Inspring...",
-    heartsCount: "1.000",
-  },
-  {
-    id: "3127:22439",
-    senderName: "Huỳnh Dương Xuân Nhật",
-    senderHeroCode: "CEVC10",
-    senderBadge: "super",
-    receiverName: "Huỳnh Dương Xuân",
-    receiverHeroCode: "CEVC10",
-    receiverBadge: "legend",
-    time: "10:00 - 10/30/2025",
-    hashtagTitle: "IDOL GIỚI TRẺ",
-    message:
-      "Cảm ơn người em bình thường nhưng phi thường :D Cảm ơn sự chăm chỉ, cần mẫn của em đã tạo động lực rất nhiều cho team, để luôn nhắc mình luôn phải nỗ lực hơn nữa trong công việc. <3 và cuộc sống...",
-    attachmentCount: 5,
-    hashtags: "#Dedicated #Inspring #Dedicated #Inspring #Dedicated  #Inspring...",
-    heartsCount: "1.000",
-  },
-];

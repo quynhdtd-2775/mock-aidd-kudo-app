@@ -12,3 +12,9 @@
 - Q: No Docker runtime for local Supabase? → A: User installs/starts one themselves; implementation proceeds, migration verification deferred until ready
 - Q: Image size cap? → A: 5 MB per file (default, not re-asked)
 - Q: Blueprint approval? → A: Approved — forge phases 02–05
+
+## Session 2026-07-22
+
+- Q: Container runtime for local Supabase (still missing)? → A: Install colima via brew in-session; then supabase start + db reset + live verify
+- Q: Display scope for real data on /kudos-live-board? → A: ALL KUDOS feed only — kudos joined with sender/receiver profiles, newest first; highlight/spotlight/stats stay mock
+- Q: Mock data? → A: Extend supabase/seed.sql with sample kudos rows (reuse Figma mock content from kudo-posts-data.ts) so the feed has data before the first write

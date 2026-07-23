@@ -18,7 +18,20 @@
   },
   "UserMenu": {
     "accountAriaLabel": "Tài khoản",
+    "profile": "Hồ sơ",
+    "adminDashboard": "Trang quản trị",
     "logout": "Đăng xuất"
+  },
+  "Notifications": {
+    "bellAriaLabel": "Thông báo",
+    "panelTitle": "Thông báo",
+    "empty": "Chưa có thông báo nào."
+  },
+  "Admin": {
+    "metaTitle": "Trang quản trị | Sun* Annual Awards 2025",
+    "metaDescription": "Trang quản trị dành cho admin (placeholder).",
+    "heading": "Trang quản trị",
+    "placeholder": "Trang này sẽ sớm ra mắt."
   },
   "Hero": {
     "comingSoon": "Comming soon",
@@ -26,10 +39,10 @@
     "countdownHours": "HOURS",
     "countdownMinutes": "MINUTES",
     "eventTimeLabel": "Thời gian: ",
-    "eventTimeValue": "26/12/2025",
+    "eventTimeValue": "18h30",
     "eventLocationLabel": "Địa điểm:",
-    "eventLocationValue": "Âu Cơ Art Center",
-    "livestreamNote": "Tường thuật trực tiếp qua sóng Livestream",
+    "eventLocationValue": "Nhà hát nghệ thuật quân đội",
+    "livestreamNote": "Tường thuật trực tiếp tại Group Facebook Sun* Family",
     "ctaAboutAwards": "ABOUT AWARDS",
     "ctaAboutKudos": "ABOUT KUDOS",
     "widgetButtonAriaLabel": "Viết Kudos",
@@ -145,6 +158,7 @@
     "prevPageAriaLabel": "Trang trước",
     "nextPageAriaLabel": "Trang sau",
     "allKudosHeading": "ALL KUDOS",
+    "allKudosEmpty": "Chưa có lời cảm ơn nào.",
     "giftReceiversTitle": "10 SUNNER NHẬN QUÀ\nMỚI NHẤT",
     "statKudosReceived": "Số Kudos bạn nhận được:",
     "statKudosSent": "Số Kudos bạn đã gửi:",
@@ -159,7 +173,10 @@
     "heroBadgeNew": "New Hero",
     "heroBadgeRising": "Rising Hero",
     "heroBadgeLegend": "Legend Hero",
-    "heroBadgeSuper": "Super Hero"
+    "heroBadgeSuper": "Super Hero",
+    "likeKudo": "Thích",
+    "unlikeKudo": "Bỏ thích",
+    "ownKudoHeartDisabled": "Bạn không thể thả tim cho kudo của chính mình"
   },
   "Profile": {
     "metaTitle": "Profile bản thân | Sun* Annual Awards 2025",

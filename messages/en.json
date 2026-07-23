@@ -18,7 +18,20 @@
   },
   "UserMenu": {
     "accountAriaLabel": "Account",
+    "profile": "Profile",
+    "adminDashboard": "Admin Dashboard",
     "logout": "Log out"
+  },
+  "Notifications": {
+    "bellAriaLabel": "Notifications",
+    "panelTitle": "Notifications",
+    "empty": "No notifications yet."
+  },
+  "Admin": {
+    "metaTitle": "Admin Dashboard | Sun* Annual Awards 2025",
+    "metaDescription": "Admin-only dashboard placeholder.",
+    "heading": "Admin Dashboard",
+    "placeholder": "This dashboard is coming soon."
   },
   "Hero": {
     "comingSoon": "Coming soon",
@@ -26,10 +39,10 @@
     "countdownHours": "HOURS",
     "countdownMinutes": "MINUTES",
     "eventTimeLabel": "Time: ",
-    "eventTimeValue": "26/12/2025",
+    "eventTimeValue": "6:30 PM",
     "eventLocationLabel": "Location:",
-    "eventLocationValue": "Âu Cơ Art Center",
-    "livestreamNote": "Streamed live via Livestream",
+    "eventLocationValue": "Army Art Theatre",
+    "livestreamNote": "Broadcast live on the Sun* Family Facebook Group",
     "ctaAboutAwards": "ABOUT AWARDS",
     "ctaAboutKudos": "ABOUT KUDOS",
     "widgetButtonAriaLabel": "Write Kudos",
@@ -145,6 +158,7 @@
     "prevPageAriaLabel": "Previous page",
     "nextPageAriaLabel": "Next page",
     "allKudosHeading": "ALL KUDOS",
+    "allKudosEmpty": "No kudos yet.",
     "giftReceiversTitle": "10 LATEST SUNNERS\nWHO RECEIVED GIFTS",
     "statKudosReceived": "Kudos you received:",
     "statKudosSent": "Kudos you sent:",
@@ -159,7 +173,10 @@
     "heroBadgeNew": "New Hero",
     "heroBadgeRising": "Rising Hero",
     "heroBadgeLegend": "Legend Hero",
-    "heroBadgeSuper": "Super Hero"
+    "heroBadgeSuper": "Super Hero",
+    "likeKudo": "Like",
+    "unlikeKudo": "Unlike",
+    "ownKudoHeartDisabled": "You can't heart your own kudo"
   },
   "Profile": {
     "metaTitle": "My Profile | Sun* Annual Awards 2025",

@@ -1,0 +1,32 @@
+{
+ "commands": [
+  {
+   "command": "pnpm exec vitest run",
+   "exitCode": 0,
+   "status": "pass",
+   "summary": "310 tests / 19 files pass, post-review-fix run (sanitizer XSS matrix, createKudo validation, feed mapper incl formatHashtagsDisplay, formatters, image validation)",
+   "ts": "2026-07-22T08:30:24Z"
+  },
+  {
+   "command": "pnpm exec tsc --noEmit",
+   "exitCode": 0,
+   "status": "pass",
+   "summary": "typecheck clean after review fixes (getAllKudos logging, dead mock removal)",
+   "ts": "2026-07-22T08:30:24Z"
+  },
+  {
+   "command": "pnpm exec eslint lib/kudos lib/format components/kudos components/kudos-live-board app/kudos-live-board",
+   "exitCode": 0,
+   "status": "pass",
+   "summary": "lint clean on all feature dirs",
+   "ts": "2026-07-22T08:30:24Z"
+  },
+  {
+   "command": "playwright live e2e: /kudos-live-board -> modal -> G\u1eedi -> feed",
+   "exitCode": 0,
+   "status": "pass",
+   "summary": "live round-trip vs local Supabase: seeded feed (7 kudos incl anonymous) renders; submit persists row (psql-verified); new kudo top of feed with #hashtag, formatted time, title; failed-submit path preserves form state with field error",
+   "ts": "2026-07-22T08:30:24Z"
+  }
+ ]
+}

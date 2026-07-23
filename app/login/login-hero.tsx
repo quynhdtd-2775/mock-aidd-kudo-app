@@ -1,5 +1,6 @@
 /* eslint-disable @next/next/no-img-element */
 import { getTranslations } from "next-intl/server";
+import { EmailLoginForm } from "./email-login-form";
 import { GoogleLoginButton } from "./google-login-button";
 
 type LoginHeroProps = {
@@ -37,6 +38,8 @@ export async function LoginHero({ error }: LoginHeroProps) {
         {error ? (
           <p className="text-sm text-white">{t("loginFailedError")}</p>
         ) : null}
+
+        <EmailLoginForm />
       </div>
     </div>
   );

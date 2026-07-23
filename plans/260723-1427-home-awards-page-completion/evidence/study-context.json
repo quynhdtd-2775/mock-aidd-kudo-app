@@ -1,0 +1,21 @@
+{
+  "task": "Complete the Hệ thống giải page (/home-awards-page): click-driven menu active state with smooth scroll, Chi tiết CTA navigation to /kudos-live-board, and verification against MoMorph test cases ID-9/11/12/13 (screen zFYDgyj_pD).",
+  "mode": "interactive",
+  "acceptanceCriteria": [
+    "Menu click moves the single gold+underline active state and smooth-scrolls to the matching award card",
+    "Missing scroll target is a graceful no-op with no JS error",
+    "Chi tiet CTA navigates to /kudos-live-board in the same tab",
+    "Type-check, changed-file lint, and full unit suite pass"
+  ],
+  "touchpoints": [
+    "components/home-awards-page/award-menu.tsx",
+    "components/home-awards-page/award-menu-nav.tsx",
+    "components/home-awards-page/scroll-to-award-section.ts",
+    "components/home-awards-page/scroll-to-award-section.test.ts",
+    "components/home-awards-page/icon-target.tsx",
+    "components/home-awards-page/award-card.tsx",
+    "components/home-awards-page/sunkudos-section.tsx"
+  ],
+  "blastRadius": "award-card.tsx re-exports IconTarget (now imported from icon-target.tsx) — any consumer of that export; the awards page render tree; no API/DB/auth changes",
+  "contracts": "Visual styling byte-identical to MoMorph design; anchor hrefs preserved for no-JS; static i18n content unchanged; Supabase remains auth-only (clarifications.md)"
+}

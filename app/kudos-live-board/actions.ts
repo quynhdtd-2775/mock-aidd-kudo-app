@@ -12,6 +12,7 @@ import { removeKudoImages, uploadKudoImages, validateImages } from "@/lib/kudos/
 import type {
   CreateKudoInput,
   CreateKudoResult,
+  HeartToggleResult,
   ProfileSuggestion,
 } from "@/lib/kudos/kudos-types";
 
@@ -129,4 +130,96 @@ export async function createKudo(input: CreateKudoInput): Promise<CreateKudoResu
   }
 
   return { ok: true };
+}
+
+/**
+ * Toggle the current user's heart/like on a kudo. Inserts a `kudo_hearts`
+ * row (like) or deletes it (unlike); a DB trigger keeps `kudos.hearts_count`
+ * in sync, so this action never writes that column directly.
+ *
+ * The mock-auth dev path runs on the service-role client (bypasses RLS), so
+ * self-like and one-per-user semantics MUST also be enforced here in code —
+ * RLS alone is not sufficient defense in that path.
+ */
+export async function toggleKudoHeart(kudoId: string): Promise<HeartToggleResult> {
+  const uid = await resolveCurrentUserId();
+  if (!uid) {
+    redirect("/login");
+  }
+
+  let supabase: SupabaseClient;
+  try {
+    supabase = await getWriteClient();
+  } catch (err) {
+    console.error("toggleKudoHeart: failed to obtain write client", err);
+    return { ok: false, error: "toggle_failed" };
+  }
+
+  const { data: kudo, error: kudoLookupError } = await supabase
+    .from("kudos")
+    .select("sender_id")
+    .eq("id", kudoId)
+    .maybeSingle();
+  if (kudoLookupError || !kudo) {
+    return { ok: false, error: "kudo_not_found" };
+  }
+  if (kudo.sender_id === uid) {
+    return { ok: false, error: "self_like" };
+  }
+
+  const { data: existing, error: existingLookupError } = await supabase
+    .from("kudo_hearts")
+    .select("kudo_id")
+    .eq("kudo_id", kudoId)
+    .eq("user_id", uid)
+    .maybeSingle();
+  if (existingLookupError) {
+    console.error("toggleKudoHeart: existing-like lookup failed", existingLookupError);
+    return { ok: false, error: "toggle_failed" };
+  }
+
+  let liked: boolean;
+  if (existing) {
+    const { error: deleteError } = await supabase
+      .from("kudo_hearts")
+      .delete()
+      .eq("kudo_id", kudoId)
+      .eq("user_id", uid);
+    if (deleteError) {
+      console.error("toggleKudoHeart: unlike delete failed", deleteError);
+      return { ok: false, error: "toggle_failed" };
+    }
+    liked = false;
+  } else {
+    const { error: insertError } = await supabase
+      .from("kudo_hearts")
+      .insert({ kudo_id: kudoId, user_id: uid, hearts_value: 1 });
+    if (insertError) {
+      // 23505 = unique_violation on (kudo_id, user_id): the read-then-write
+      // above isn't atomic, so a concurrent toggle (multi-tab, rapid retry)
+      // can win the race and insert first. That's not a failure — the like
+      // already exists, so treat it as success instead of reverting the
+      // optimistic UI back to "not liked" while the DB says liked.
+      if (insertError.code === "23505") {
+        liked = true;
+      } else {
+        console.error("toggleKudoHeart: like insert failed", insertError);
+        return { ok: false, error: "toggle_failed" };
+      }
+    } else {
+      liked = true;
+    }
+  }
+
+  const { data: refreshedKudo, error: refreshError } = await supabase
+    .from("kudos")
+    .select("hearts_count")
+    .eq("id", kudoId)
+    .maybeSingle();
+  if (refreshError || !refreshedKudo) {
+    console.error("toggleKudoHeart: hearts_count re-read failed", refreshError);
+    return { ok: false, error: "toggle_failed" };
+  }
+
+  return { ok: true, liked, heartsCount: refreshedKudo.hearts_count };
 }

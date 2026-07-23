@@ -4,6 +4,17 @@ import { AWARD_CARDS, AwardCard } from "./award-card";
 const GOLD = "rgba(255, 234, 158, 1)";
 const DIVIDER_COLOR = "rgba(46, 57, 64, 1)";
 
+// Anchor slugs on /home-awards-page, keyed by card nodeId — must match
+// CARD_ANCHORS in components/home-awards-page/awards-section.tsx.
+const CARD_ANCHORS: Record<string, string> = {
+  "2167:9075": "top-talent",
+  "2167:9076": "top-project",
+  "2167:9077": "top-project-leader",
+  "2167:9079": "best-manager",
+  "2167:9080": "signature-2025-creator",
+  "2167:9081": "mvp",
+};
+
 export async function AwardsSection() {
   const t = await getTranslations("Awards");
 
@@ -40,8 +51,8 @@ export async function AwardsSection() {
         </h2>
       </div>
 
-      {/* mm:5005:14974 — mms_C2_Award list (rows mm:2167:9074 / mm:2167:9078) */}
-      <div className="grid w-full grid-cols-1 justify-items-center gap-x-10 gap-y-12 sm:grid-cols-2 sm:justify-items-start lg:grid-cols-[repeat(3,336px)] lg:justify-between lg:gap-y-20">
+      {/* mm:5005:14974 — mms_C2_Award list (rows mm:2167:9074 / mm:2167:9078); 2-col mobile+tablet, 3-col desktop per spec ID-15/16 */}
+      <div className="grid w-full grid-cols-2 justify-items-start gap-x-4 gap-y-10 sm:gap-x-10 sm:gap-y-12 lg:grid-cols-[repeat(3,336px)] lg:justify-between lg:gap-y-20">
         {AWARD_CARDS.map((card) => (
           <AwardCard
             key={card.id}
@@ -49,6 +60,7 @@ export async function AwardsSection() {
             title={t(`cards.${card.messageKey}.title`)}
             description={t(`cards.${card.messageKey}.description`)}
             detailsLabel={t("detailsButton")}
+            slug={CARD_ANCHORS[card.id]}
           />
         ))}
       </div>

@@ -5,11 +5,26 @@
 import { cookies } from "next/headers";
 import type { AuthUser } from "./auth-types";
 import { MOCK_SESSION_COOKIE, MOCK_USER } from "./mock-session";
+import { GOOGLE_PROFILE_COOKIE, type GoogleProfile } from "./google-oauth";
 
-/** Server components/actions: read the mock session. */
+/** Server components/actions: read the mock session.
+ * When the direct Google OAuth flow (lib/auth/google-oauth.ts) stamped a
+ * profile cookie, that real identity overlays the anonymous demo user —
+ * the id stays DEMO_USER_ID so seeded-DB pages keep resolving. */
 export async function getMockUser(): Promise<AuthUser | null> {
   const cookieStore = await cookies();
-  return cookieStore.get(MOCK_SESSION_COOKIE)?.value === "1" ? MOCK_USER : null;
+  if (cookieStore.get(MOCK_SESSION_COOKIE)?.value !== "1") return null;
+
+  const rawProfile = cookieStore.get(GOOGLE_PROFILE_COOKIE)?.value;
+  if (rawProfile) {
+    try {
+      const profile = JSON.parse(rawProfile) as GoogleProfile;
+      return { ...MOCK_USER, ...profile };
+    } catch {
+      // Malformed cookie — fall back to the anonymous demo user.
+    }
+  }
+  return MOCK_USER;
 }
 
 /** Server action: simulate a successful login. */
@@ -22,8 +37,9 @@ export async function createMockSession(): Promise<void> {
   });
 }
 
-/** Server action: simulate logout. */
+/** Server action: simulate logout. Also drops the Google identity overlay. */
 export async function clearMockSession(): Promise<void> {
   const cookieStore = await cookies();
   cookieStore.delete(MOCK_SESSION_COOKIE);
+  cookieStore.delete(GOOGLE_PROFILE_COOKIE);
 }

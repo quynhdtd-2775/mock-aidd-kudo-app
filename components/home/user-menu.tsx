@@ -1,18 +1,22 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { logout } from "@/app/auth/actions";
 
 type UserMenuProps = {
   email: string | null;
+  /** True when the signed-in user's profiles.role === 'admin'. */
+  isAdmin?: boolean;
 };
 
 /**
  * mm:I313:8440;186:1597 — header profile button, now interactive: opens a
- * small dropdown with the signed-in email and a logout action.
+ * small dropdown with the signed-in email, a Profile link, an admin-only
+ * Admin Dashboard link, and a logout action.
  */
-export function UserMenu({ email }: UserMenuProps) {
+export function UserMenu({ email, isAdmin = false }: UserMenuProps) {
   const t = useTranslations("UserMenu");
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
@@ -68,6 +72,24 @@ export function UserMenu({ email }: UserMenuProps) {
             <p className="truncate px-3 py-2 text-sm text-white/70" title={email}>
               {email}
             </p>
+          ) : null}
+          <Link
+            href="/profile"
+            role="menuitem"
+            onClick={() => setOpen(false)}
+            className="block w-full rounded-md px-3 py-2 text-left text-sm font-bold text-white transition-colors duration-200 hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FFEA9E]"
+          >
+            {t("profile")}
+          </Link>
+          {isAdmin ? (
+            <Link
+              href="/admin"
+              role="menuitem"
+              onClick={() => setOpen(false)}
+              className="block w-full rounded-md px-3 py-2 text-left text-sm font-bold text-white transition-colors duration-200 hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FFEA9E]"
+            >
+              {t("adminDashboard")}
+            </Link>
           ) : null}
           <form action={logout}>
             <button

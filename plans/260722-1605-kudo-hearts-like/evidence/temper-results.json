@@ -1,0 +1,32 @@
+{
+ "commands": [
+  {
+   "command": "pnpm exec vitest run",
+   "exitCode": 0,
+   "status": "pass",
+   "summary": "330 tests / 20 files pass post-review-fix (hearts action matrix incl 23505 vs 23503, feed query scoping, mapper passthrough, i18n parity)",
+   "ts": "2026-07-22T09:38:16Z"
+  },
+  {
+   "command": "pnpm exec tsc --noEmit",
+   "exitCode": 0,
+   "status": "pass",
+   "summary": "typecheck clean",
+   "ts": "2026-07-22T09:38:16Z"
+  },
+  {
+   "command": "pnpm exec eslint app/kudos-live-board lib/kudos components/kudos-live-board",
+   "exitCode": 0,
+   "status": "pass",
+   "summary": "lint clean",
+   "ts": "2026-07-22T09:38:16Z"
+  },
+  {
+   "command": "live verify: browser toggle + psql",
+   "exitCode": 0,
+   "status": "pass",
+   "summary": "like -> row + count 0->1 + red/pressed 'B\u1ecf th\u00edch'; unlike -> row deleted + count 0; trigger sync psql-verified; CHECK constraint rejects hearts_value=-5/999999 even as superuser; real 2-account usage produced 0 self-like rows",
+   "ts": "2026-07-22T09:38:16Z"
+  }
+ ]
+}
